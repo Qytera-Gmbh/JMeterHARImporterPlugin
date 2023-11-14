@@ -1,2 +1,1 @@
-mvn install -Djmeter.path=C:/scoop/apps/jmeter/current
-jmeter
+mvn install -Djmeter.path=C:/scoop/apps/jmeter/current && jmeter
