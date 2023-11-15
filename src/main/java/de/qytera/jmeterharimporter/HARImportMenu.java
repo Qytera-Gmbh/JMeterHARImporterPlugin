@@ -13,8 +13,6 @@ import org.apache.jmeter.gui.plugin.MenuCreator;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.IOException;
-
 import javax.swing.*;
 
 
@@ -116,11 +114,8 @@ public class HARImportMenu implements MenuCreator, ActionListener {
 
         importButton.addActionListener(e -> {
             importWizard.dispose();
-            try {
-                new HARImporter(textField.getText());
-            } catch (IOException e1) {
-                e1.printStackTrace();
-            }
+            HARImporter importer = new HARImporter(textField.getText());
+            importer.addNewThreadGroupWithSamplers();
         });
     }
 }

@@ -1,16 +1,81 @@
 package de.qytera.jmeterharimporter;
 
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import org.json.JSONObject;
-import java.io.IOException;
+import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
+import org.apache.jmeter.control.TransactionController;
+import org.apache.jmeter.control.gui.LoopControlPanel;
+import org.apache.jmeter.exceptions.IllegalUserActionException;
+import org.apache.jmeter.gui.GuiPackage;
+import org.apache.jmeter.gui.tree.JMeterTreeNode;
+import org.apache.jmeter.protocol.http.sampler.HTTPSamplerProxy;
+import org.apache.jmeter.protocol.http.control.gui.HttpTestSampleGui;
+import org.apache.jmeter.testelement.TestElement;
+import de.sstoehr.harreader.HarReader;
+import de.sstoehr.harreader.HarReaderException;
+import de.sstoehr.harreader.model.Har;
+import de.sstoehr.harreader.model.HarEntry;
+import de.sstoehr.harreader.model.HarQueryParam;
 
 public class HARImporter {
-    private JSONObject json;
+    Har har;
 
-    public HARImporter(String filePath) throws IOException {
-        String content = new String(Files.readAllBytes(Paths.get(filePath)));
-        this.json = new JSONObject(content);
-        System.out.println(this.json.getJSONObject("log").getJSONArray("entries").getJSONObject(0).getJSONObject("request").getString("url"));
+    public HARImporter(String filePath) {
+        try {
+            this.har = new HarReader().readFromFile(new File(filePath));
+        } catch (HarReaderException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void addNewThreadGroupWithSamplers() {
+        try {
+            GuiPackage guiPackage = GuiPackage.getInstance();
+            JMeterTreeNode root = (JMeterTreeNode) guiPackage.getTreeModel().getRoot();
+
+            TransactionController transactionController = new TransactionController();
+            transactionController.setName("Imported HAR Requests");
+            transactionController.setProperty(TestElement.TEST_CLASS, TransactionController.class.getName());
+            transactionController.setProperty(TestElement.GUI_CLASS, LoopControlPanel.class.getName());
+
+            JMeterTreeNode transactionControllerNode = guiPackage.getTreeModel().addComponent(transactionController,
+                    root);
+
+            int i = 1;
+            for (HarEntry harEntry : this.har.getLog().getEntries()) {
+                String urlString = harEntry.getRequest().getUrl();
+                URL url = new URL(urlString);
+
+                TransactionController transactionControllerSub = new TransactionController();
+                transactionControllerSub.setName(String.format("TC.%03d - " + url.getHost(), i++));
+                transactionControllerSub.setProperty(TestElement.TEST_CLASS, TransactionController.class.getName());
+                transactionControllerSub.setProperty(TestElement.GUI_CLASS, LoopControlPanel.class.getName());
+
+                JMeterTreeNode transactionControllerNodeSub = guiPackage.getTreeModel()
+                        .addComponent(transactionControllerSub, transactionControllerNode);
+
+                HTTPSamplerProxy httpSampler = new HTTPSamplerProxy();
+                httpSampler.setName(harEntry.getRequest().getMethod().name() + " - " + url.getPath());
+                httpSampler.setProtocol(url.getProtocol());
+                httpSampler.setDomain(url.getHost());
+                httpSampler.setPort(url.getPort() == -1 ? url.getDefaultPort() : url.getPort());
+                httpSampler.setMethod(harEntry.getRequest().getMethod().name());
+                httpSampler.setPath(url.getPath());
+
+                for (HarQueryParam queryParam : harEntry.getRequest().getQueryString()) {
+                    httpSampler.addArgument(queryParam.getName(), queryParam.getValue());
+                }
+
+                httpSampler.setProperty(TestElement.TEST_CLASS, HTTPSamplerProxy.class.getName());
+                httpSampler.setProperty(TestElement.GUI_CLASS, HttpTestSampleGui.class.getName());
+
+                guiPackage.getTreeModel().addComponent(httpSampler, transactionControllerNodeSub);
+            }
+
+            // Refresh the JMeter GUI
+            guiPackage.getMainFrame().repaint();
+        } catch (IllegalUserActionException | MalformedURLException e) {
+            e.printStackTrace();
+        }
     }
 }
