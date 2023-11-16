@@ -11,6 +11,9 @@ import org.apache.jmeter.gui.tree.JMeterTreeNode;
 import org.apache.jmeter.protocol.http.sampler.HTTPSamplerProxy;
 import org.apache.jmeter.protocol.http.control.gui.HttpTestSampleGui;
 import org.apache.jmeter.testelement.TestElement;
+import org.apache.jmeter.timers.ConstantTimer;
+import org.apache.jmeter.timers.gui.ConstantTimerGui;
+
 import de.sstoehr.harreader.HarReader;
 import de.sstoehr.harreader.HarReaderException;
 import de.sstoehr.harreader.model.Har;
@@ -42,6 +45,7 @@ public class HARImporter {
                     root);
 
             int i = 1;
+            long lastTimestamp = -1;
             for (HarEntry harEntry : this.har.getLog().getEntries()) {
                 String urlString = harEntry.getRequest().getUrl();
                 URL url = new URL(urlString);
@@ -53,6 +57,22 @@ public class HARImporter {
 
                 JMeterTreeNode transactionControllerNodeSub = guiPackage.getTreeModel()
                         .addComponent(transactionControllerSub, transactionControllerNode);
+
+                if (lastTimestamp == -1) {
+                    lastTimestamp = harEntry.getStartedDateTime().getTime();
+                }
+
+                long timeDifference = harEntry.getStartedDateTime().getTime() - lastTimestamp;
+                lastTimestamp = harEntry.getStartedDateTime().getTime();
+
+                // add a constant timer to simulate the think time
+                ConstantTimer constantTimer = new ConstantTimer();
+                constantTimer.setName("Think Time");
+                constantTimer.setDelay(String.valueOf(timeDifference));
+                constantTimer.setProperty(TestElement.TEST_CLASS, ConstantTimer.class.getName());
+                constantTimer.setProperty(TestElement.GUI_CLASS, ConstantTimerGui.class.getName());
+                guiPackage.getTreeModel().addComponent(constantTimer,
+                transactionControllerNodeSub);
 
                 HTTPSamplerProxy httpSampler = new HTTPSamplerProxy();
                 httpSampler.setName(harEntry.getRequest().getMethod().name() + " - " + url.getPath());
