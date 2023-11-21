@@ -9,10 +9,13 @@ import org.apache.jmeter.exceptions.IllegalUserActionException;
 import org.apache.jmeter.gui.GuiPackage;
 import org.apache.jmeter.gui.tree.JMeterTreeNode;
 import org.apache.jmeter.protocol.http.sampler.HTTPSamplerProxy;
+import org.apache.jmeter.protocol.http.control.HeaderManager;
 import org.apache.jmeter.protocol.http.control.gui.HttpTestSampleGui;
+import org.apache.jmeter.protocol.http.gui.HeaderPanel;
 import org.apache.jmeter.testelement.TestElement;
 import org.apache.jmeter.timers.ConstantTimer;
 import org.apache.jmeter.timers.gui.ConstantTimerGui;
+import de.sstoehr.harreader.model.HarHeader;
 
 import de.sstoehr.harreader.HarReader;
 import de.sstoehr.harreader.HarReaderException;
@@ -71,8 +74,7 @@ public class HARImporter {
                 constantTimer.setDelay(String.valueOf(timeDifference));
                 constantTimer.setProperty(TestElement.TEST_CLASS, ConstantTimer.class.getName());
                 constantTimer.setProperty(TestElement.GUI_CLASS, ConstantTimerGui.class.getName());
-                guiPackage.getTreeModel().addComponent(constantTimer,
-                transactionControllerNodeSub);
+                guiPackage.getTreeModel().addComponent(constantTimer, transactionControllerNodeSub);
 
                 HTTPSamplerProxy httpSampler = new HTTPSamplerProxy();
                 httpSampler.setName(harEntry.getRequest().getMethod().name() + " - " + url.getPath());
@@ -89,7 +91,21 @@ public class HARImporter {
                 httpSampler.setProperty(TestElement.TEST_CLASS, HTTPSamplerProxy.class.getName());
                 httpSampler.setProperty(TestElement.GUI_CLASS, HttpTestSampleGui.class.getName());
 
-                guiPackage.getTreeModel().addComponent(httpSampler, transactionControllerNodeSub);
+                JMeterTreeNode httpSamplerNode = guiPackage.getTreeModel().addComponent(httpSampler, transactionControllerNodeSub);
+
+                // add header manager to sampler
+                if (harEntry.getRequest().getHeaders().size() > 0) {
+                    // Create Header Manager
+                    HeaderManager headerManager = new HeaderManager();
+                    headerManager.setName("browser-headers");
+                    headerManager.setProperty(TestElement.TEST_CLASS, HeaderManager.class.getName());
+                    headerManager.setProperty(TestElement.GUI_CLASS, HeaderPanel.class.getName());
+                    for (HarHeader header : harEntry.getRequest().getHeaders()) {
+                        headerManager.add(new org.apache.jmeter.protocol.http.control.Header(header.getName(), header.getValue()));
+                    }
+
+                    guiPackage.getTreeModel().addComponent(headerManager, httpSamplerNode);
+                }
             }
 
             // Refresh the JMeter GUI
