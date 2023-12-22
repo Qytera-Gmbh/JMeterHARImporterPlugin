@@ -10,6 +10,7 @@ import org.apache.jmeter.control.TransactionController;
 import org.apache.jmeter.control.gui.LoopControlPanel;
 import org.apache.jmeter.exceptions.IllegalUserActionException;
 import org.apache.jmeter.gui.GuiPackage;
+import org.apache.jmeter.gui.tree.JMeterTreeModel;
 import org.apache.jmeter.gui.tree.JMeterTreeNode;
 import org.apache.jmeter.protocol.http.control.Cookie;
 import org.apache.jmeter.protocol.http.control.HeaderManager;
@@ -56,6 +57,10 @@ public class HARImporter {
             e.printStackTrace();
         }
 
+        if (GuiPackage.getInstance() == null) {
+            GuiPackage.initInstance(null, new JMeterTreeModel());
+        }
+
         this.guiPackage = GuiPackage.getInstance();
     }
 
@@ -63,14 +68,13 @@ public class HARImporter {
      * Adds a new Thread Group to the JMeter tree and adds a HTTP Sampler for each
      * HAR entry
      */
-    public void addNewThreadGroupWithSamplers() {
+    public JMeterTreeNode addNewThreadGroupWithSamplers() {
         try {
             // Get the root node of the JMeter tree
             JMeterTreeNode root = (JMeterTreeNode) this.guiPackage.getTreeModel().getRoot();
 
             // Create a Thread Group to hold the requests
-            ThreadGroup threadGroup = createThreadGroup();
-            JMeterTreeNode threadGroupNode = addComponent(threadGroup, root);
+            JMeterTreeNode threadGroupNode = addComponent(createThreadGroup(), root);
 
             int i = 1;
             long lastTimestamp = -1;
@@ -104,12 +108,16 @@ public class HARImporter {
             }
 
             // Refresh the JMeter GUI
-            this.guiPackage.getMainFrame().repaint();
-        } catch (IllegalUserActionException |
+            if (this.guiPackage.getMainFrame() != null) {
+                this.guiPackage.getMainFrame().repaint();
+            }
 
-                MalformedURLException e) {
+            return threadGroupNode;
+        } catch (IllegalUserActionException | MalformedURLException e) {
             e.printStackTrace();
         }
+
+        return null;
     }
 
     private JMeterTreeNode addComponent(AbstractTestElement component, JMeterTreeNode node)
