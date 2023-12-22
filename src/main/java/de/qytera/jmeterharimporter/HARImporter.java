@@ -16,6 +16,7 @@ import org.apache.jmeter.protocol.http.control.HeaderManager;
 import org.apache.jmeter.protocol.http.control.gui.HttpTestSampleGui;
 import org.apache.jmeter.protocol.http.gui.HeaderPanel;
 import org.apache.jmeter.protocol.http.sampler.HTTPSamplerProxy;
+import org.apache.jmeter.testelement.AbstractTestElement;
 import org.apache.jmeter.testelement.TestElement;
 import org.apache.jmeter.threads.ThreadGroup;
 import org.apache.jmeter.timers.ConstantTimer;
@@ -32,126 +33,192 @@ import de.sstoehr.harreader.model.Har;
 import de.sstoehr.harreader.model.HarEntry;
 import de.sstoehr.harreader.model.HarHeader;
 import de.sstoehr.harreader.model.HarQueryParam;
+import de.sstoehr.harreader.model.HarRequest;
 
 public class HARImporter {
-    Har har;
+    /**
+     *
+     */
+    private static final String THINK_TIME = "Think Time";
+    private static final String HAR_IMPORTED = "HAR Imported";
+    private Har har;
+    private GuiPackage guiPackage;
 
+    /**
+     * Constructor for the HARImporter class
+     * 
+     * @param filePath
+     */
     public HARImporter(String filePath) {
         try {
             this.har = new HarReader().readFromFile(new File(filePath));
         } catch (HarReaderException e) {
             e.printStackTrace();
         }
+
+        this.guiPackage = GuiPackage.getInstance();
     }
 
+    /**
+     * Adds a new Thread Group to the JMeter tree and adds a HTTP Sampler for each
+     * HAR entry
+     */
     public void addNewThreadGroupWithSamplers() {
         try {
-            GuiPackage guiPackage = GuiPackage.getInstance();
-            JMeterTreeNode root = (JMeterTreeNode) guiPackage.getTreeModel().getRoot();
+            // Get the root node of the JMeter tree
+            JMeterTreeNode root = (JMeterTreeNode) this.guiPackage.getTreeModel().getRoot();
 
-            // add a new thread group
-            LoopController loopController = new LoopController();
-            loopController.setLoops(1);
-            loopController.setFirst(true);
-            loopController.setProperty(TestElement.TEST_CLASS, LoopController.class.getName());
-            loopController.setProperty(TestElement.GUI_CLASS, LoopControlPanel.class.getName());
-            loopController.initialize();
-
-            ThreadGroup threadGroup = new ThreadGroup();
-            threadGroup.setName("HAR Imported");
-            threadGroup.setNumThreads(1);
-            threadGroup.setRampUp(1);
-            threadGroup.setSamplerController(loopController);
-            threadGroup.setEnabled(false);
-            threadGroup.setProperty(TestElement.TEST_CLASS, ThreadGroup.class.getName());
-            threadGroup.setProperty(TestElement.GUI_CLASS, ThreadGroupGui.class.getName());
-            JMeterTreeNode threadGroupNode = guiPackage.getTreeModel().addComponent(threadGroup, root);
+            // Create a Thread Group to hold the requests
+            ThreadGroup threadGroup = createThreadGroup();
+            JMeterTreeNode threadGroupNode = addComponent(threadGroup, root);
 
             int i = 1;
             long lastTimestamp = -1;
             for (HarEntry harEntry : this.har.getLog().getEntries()) {
-                String urlString = harEntry.getRequest().getUrl();
-                URL url = new URL(urlString);
+                HarRequest harRequest = harEntry.getRequest();
+                // add a transaction controller for each entry to group the samplers
+                JMeterTreeNode transactionControllerNodeSub = addComponent(createTransactionController(
+                        String.format("TC.%03d - " + new URL(harRequest.getUrl()).getHost(), i++)),
+                        threadGroupNode);
 
-                TransactionController transactionControllerSub = new TransactionController();
-                transactionControllerSub.setName(String.format("TC.%03d - " + url.getHost(), i++));
-                transactionControllerSub.setProperty(TestElement.TEST_CLASS, TransactionController.class.getName());
-                transactionControllerSub.setProperty(TestElement.GUI_CLASS, LoopControlPanel.class.getName());
-
-                JMeterTreeNode transactionControllerNodeSub = guiPackage.getTreeModel()
-                        .addComponent(transactionControllerSub, threadGroupNode);
-
+                // calculate think time
                 if (lastTimestamp == -1) {
-                    lastTimestamp = harEntry.getStartedDateTime().getTime();
+                    lastTimestamp = harEntry.getStartedDateTime().getTime(); // first entry should become 0
                 }
 
-                long timeDifference = harEntry.getStartedDateTime().getTime() - lastTimestamp;
                 lastTimestamp = harEntry.getStartedDateTime().getTime();
+                long timeDifference = harEntry.getStartedDateTime().getTime() - lastTimestamp;
 
                 // add a constant timer to simulate the think time
-                ConstantTimer constantTimer = new ConstantTimer();
-                constantTimer.setName("Think Time");
-                constantTimer.setDelay(String.valueOf(timeDifference));
-                constantTimer.setProperty(TestElement.TEST_CLASS, ConstantTimer.class.getName());
-                constantTimer.setProperty(TestElement.GUI_CLASS, ConstantTimerGui.class.getName());
-                guiPackage.getTreeModel().addComponent(constantTimer, transactionControllerNodeSub);
+                addComponent(createConstantTimer(timeDifference), transactionControllerNodeSub);
 
-                HTTPSamplerProxy httpSampler = new HTTPSamplerProxy();
-                httpSampler.setName(harEntry.getRequest().getMethod().name() + " - " + url.getPath());
-                httpSampler.setProtocol(url.getProtocol());
-                httpSampler.setDomain(url.getHost());
-                httpSampler.setPort(url.getPort() == -1 ? url.getDefaultPort() : url.getPort());
-                httpSampler.setMethod(harEntry.getRequest().getMethod().name());
-                httpSampler.setPath(url.getPath());
-
-                for (HarQueryParam queryParam : harEntry.getRequest().getQueryString()) {
-                    httpSampler.addArgument(queryParam.getName(), queryParam.getValue());
-                }
-
-                httpSampler.setProperty(TestElement.TEST_CLASS, HTTPSamplerProxy.class.getName());
-                httpSampler.setProperty(TestElement.GUI_CLASS, HttpTestSampleGui.class.getName());
-
-                JMeterTreeNode httpSamplerNode = guiPackage.getTreeModel().addComponent(httpSampler,
+                // add the http sampler
+                JMeterTreeNode httpSamplerNode = addComponent(createHttpSampler(harRequest),
                         transactionControllerNodeSub);
 
-                // add header manager to sampler
-                if (harEntry.getRequest().getHeaders().size() > 0) {
-                    // Create Header Manager
-                    HeaderManager headerManager = new HeaderManager();
-                    headerManager.setName("browser-headers");
-                    headerManager.setProperty(TestElement.TEST_CLASS, HeaderManager.class.getName());
-                    headerManager.setProperty(TestElement.GUI_CLASS, HeaderPanel.class.getName());
-                    for (HarHeader header : harEntry.getRequest().getHeaders()) {
-                        headerManager.add(new Header(header.getName(),
-                                header.getValue()));
-                    }
+                // add the header manager
+                addComponent(createHeaderManager(harRequest), httpSamplerNode);
 
-                    guiPackage.getTreeModel().addComponent(headerManager, httpSamplerNode);
-                }
-
-                // add http cookie manager to sampler
-                if (harEntry.getRequest().getCookies().size() > 0) {
-                    CookieManager cookieManager = new CookieManager();
-                    cookieManager.setName("browser-cookies");
-                    cookieManager.setProperty(TestElement.TEST_CLASS, CookieManager.class.getName());
-                    cookieManager.setProperty(TestElement.GUI_CLASS, CookiePanel.class.getName());
-                    for (HarCookie cookie : harEntry.getRequest().getCookies()) {
-                        long expiration = cookie.getExpires().getTime() - (new Date()).getTime();
-                        cookieManager.add(new Cookie(cookie.getName(), cookie.getValue(), cookie.getDomain(),
-                                cookie.getPath(), cookie.getSecure(), expiration, cookie.getPath().length() > 0,
-                                cookie.getDomain().length() > 0));
-                    }
-
-                    cookieManager.setClearEachIteration(true);
-
-                    guiPackage.getTreeModel().addComponent(cookieManager, httpSamplerNode);
-                }
+                // add the cookie manager
+                addComponent(createCookieManager(harRequest), httpSamplerNode);
             }
 
             // Refresh the JMeter GUI
-            guiPackage.getMainFrame().repaint();
-        } catch (IllegalUserActionException | MalformedURLException e) {
+            this.guiPackage.getMainFrame().repaint();
+        } catch (IllegalUserActionException |
+
+                MalformedURLException e) {
             e.printStackTrace();
         }
+    }
+
+    private JMeterTreeNode addComponent(AbstractTestElement component, JMeterTreeNode node)
+            throws IllegalUserActionException {
+        if (component == null || node == null) {
+            return null;
+        }
+
+        return this.guiPackage.getTreeModel().addComponent(component, node);
+    }
+
+    private CookieManager createCookieManager(HarRequest harRequest) {
+        CookieManager cookieManager = null;
+        if (harRequest.getCookies().size() > 0) {
+            cookieManager = new CookieManager();
+            cookieManager.setName("browser-cookies");
+            cookieManager.setProperty(TestElement.TEST_CLASS, CookieManager.class.getName());
+            cookieManager.setProperty(TestElement.GUI_CLASS, CookiePanel.class.getName());
+            for (HarCookie cookie : harRequest.getCookies()) {
+                long expiration = cookie.getExpires().getTime() - (new Date()).getTime();
+                cookieManager.add(new Cookie(cookie.getName(), cookie.getValue(), cookie.getDomain(),
+                        cookie.getPath(), cookie.getSecure(), expiration, cookie.getPath().length() > 0,
+                        cookie.getDomain().length() > 0));
+            }
+
+            cookieManager.setClearEachIteration(true);
+        }
+
+        return cookieManager;
+    }
+
+    private HeaderManager createHeaderManager(HarRequest harRequest) {
+        HeaderManager headerManager = null;
+        if (harRequest.getHeaders().size() > 0) {
+            // Create Header Manager
+            headerManager = new HeaderManager();
+            headerManager.setName("browser-headers");
+            headerManager.setProperty(TestElement.TEST_CLASS, HeaderManager.class.getName());
+            headerManager.setProperty(TestElement.GUI_CLASS, HeaderPanel.class.getName());
+            for (HarHeader header : harRequest.getHeaders()) {
+                headerManager.add(new Header(header.getName(),
+                        header.getValue()));
+            }
+        }
+
+        return headerManager;
+    }
+
+    private HTTPSamplerProxy createHttpSampler(HarRequest harRequest) throws MalformedURLException {
+        URL url = new URL(harRequest.getUrl());
+
+        HTTPSamplerProxy httpSampler = new HTTPSamplerProxy();
+        httpSampler.setName(harRequest.getMethod().name() + " - " + url.getPath());
+        httpSampler.setProtocol(url.getProtocol());
+        httpSampler.setDomain(url.getHost());
+        httpSampler.setPort(url.getPort() == -1 ? url.getDefaultPort() : url.getPort());
+        httpSampler.setMethod(harRequest.getMethod().name());
+        httpSampler.setPath(url.getPath());
+
+        for (HarQueryParam queryParam : harRequest.getQueryString()) {
+            httpSampler.addArgument(queryParam.getName(), queryParam.getValue());
+        }
+
+        httpSampler.setProperty(TestElement.TEST_CLASS, HTTPSamplerProxy.class.getName());
+        httpSampler.setProperty(TestElement.GUI_CLASS, HttpTestSampleGui.class.getName());
+
+        return httpSampler;
+    }
+
+    private ConstantTimer createConstantTimer(long time) {
+        ConstantTimer constantTimer = new ConstantTimer();
+        constantTimer.setName(THINK_TIME);
+        constantTimer.setDelay(String.valueOf(time));
+        constantTimer.setProperty(TestElement.TEST_CLASS, ConstantTimer.class.getName());
+        constantTimer.setProperty(TestElement.GUI_CLASS, ConstantTimerGui.class.getName());
+
+        return constantTimer;
+    }
+
+    private LoopController createLoopControler() {
+        LoopController loopController = new LoopController();
+        loopController.setLoops(1);
+        loopController.setFirst(true);
+        loopController.setProperty(TestElement.TEST_CLASS, LoopController.class.getName());
+        loopController.setProperty(TestElement.GUI_CLASS, LoopControlPanel.class.getName());
+        loopController.initialize();
+
+        return loopController;
+    }
+
+    private ThreadGroup createThreadGroup() {
+        ThreadGroup threadGroup = new ThreadGroup();
+        threadGroup.setName(HAR_IMPORTED);
+        threadGroup.setNumThreads(1);
+        threadGroup.setRampUp(1);
+        threadGroup.setSamplerController(createLoopControler());
+        threadGroup.setEnabled(false);
+        threadGroup.setProperty(TestElement.TEST_CLASS, ThreadGroup.class.getName());
+        threadGroup.setProperty(TestElement.GUI_CLASS, ThreadGroupGui.class.getName());
+
+        return threadGroup;
+    }
+
+    private TransactionController createTransactionController(String name) {
+        TransactionController transactionControllerSub = new TransactionController();
+        transactionControllerSub.setName(name);
+        transactionControllerSub.setProperty(TestElement.TEST_CLASS, TransactionController.class.getName());
+        transactionControllerSub.setProperty(TestElement.GUI_CLASS, LoopControlPanel.class.getName());
+
+        return transactionControllerSub;
     }
 }
