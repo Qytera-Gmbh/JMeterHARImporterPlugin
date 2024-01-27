@@ -13,10 +13,16 @@ import org.apache.jmeter.gui.plugin.MenuCreator;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
 import javax.swing.*;
 
 
 public class HARImportMenu implements MenuCreator, ActionListener {
+
+    final static String HAR_IMPORTER_CONFIG = "har-importer.txt";
 
     @Override
     public JMenuItem[] getMenuItemsAtLocation(MENU_LOCATION location) {
@@ -87,6 +93,12 @@ public class HARImportMenu implements MenuCreator, ActionListener {
         importWizard.setLocationRelativeTo(null); // Center the dialog
         importWizard.setVisible(true);
 
+        try {
+            textField.setText(Files.readString(Paths.get(HAR_IMPORTER_CONFIG)));
+        } catch (IOException e1) {
+            e1.printStackTrace();
+        }
+
         // Add action listeners
         browseButton.addActionListener(e -> {
             JFileChooser fileChooser = new JFileChooser();
@@ -107,6 +119,12 @@ public class HARImportMenu implements MenuCreator, ActionListener {
 
             if (fileChooser.showOpenDialog(importWizard) == JFileChooser.APPROVE_OPTION) {
                 textField.setText(fileChooser.getSelectedFile().getAbsolutePath());
+            }
+
+            try {
+                Files.write(Paths.get(HAR_IMPORTER_CONFIG), textField.getText().getBytes());
+            } catch (IOException e1) {
+                e1.printStackTrace();
             }
         });
 
