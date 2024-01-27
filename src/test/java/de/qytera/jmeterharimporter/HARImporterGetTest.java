@@ -4,10 +4,19 @@ import org.junit.Before;
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.jmeter.timers.ConstantTimer;
+import org.apache.jmeter.config.Argument;
 import org.apache.jmeter.gui.tree.JMeterTreeNode;
+import org.apache.jmeter.protocol.http.control.HeaderManager;
+import org.apache.jmeter.protocol.http.sampler.HTTPSamplerProxy;
 
 public class HARImporterGetTest {
-    
+
     JMeterTreeNode threadGroupNode = null;
 
     @Before
@@ -17,14 +26,71 @@ public class HARImporterGetTest {
     }
 
     @Test
-    public void testHARImporter_threadGroupName() {
+    public void testHARImporter_threadGroup() {
         assertEquals("HAR Imported", threadGroupNode.getName());
     }
 
     @Test
     public void testHARImporter_controller() {
         assertEquals(2, threadGroupNode.getChildCount());
-        assertEquals("TC.001 - www.randomnumberapi.com", ((JMeterTreeNode)threadGroupNode.getChildAt(0)).getName());
-        assertEquals("TC.002 - www.randomnumberapi.com", ((JMeterTreeNode)threadGroupNode.getChildAt(1)).getName());
+        assertEquals("TC.001 - www.randomnumberapi.com", ((JMeterTreeNode) threadGroupNode.getChildAt(0)).getName());
+        assertEquals("TC.002 - www.randomnumberapi.com", ((JMeterTreeNode) threadGroupNode.getChildAt(1)).getName());
+    }
+
+    @Test
+    public void testHARImporter_timer() {
+        String[] timerDelays = { "0", "8293" };
+
+        assertEquals(timerDelays.length, threadGroupNode.getChildCount());
+
+        for (int i = 0; i < timerDelays.length; i++) {
+            JMeterTreeNode controller = (JMeterTreeNode) threadGroupNode.getChildAt(i);
+            JMeterTreeNode timer = (JMeterTreeNode) controller.getChildAt(0);
+            assertEquals("Think Time", timer.getName());
+            ConstantTimer timerObject = (ConstantTimer) timer.getUserObject();
+            assertEquals(timerDelays[i], timerObject.getDelay());
+        }
+    }
+
+    @Test
+    public void testHARImporter_request() {
+        List<Map<String, String>> listOfMaps = new ArrayList<>();
+
+        Map<String, String> firstMap = new HashMap<>();
+        firstMap.put("min", "100");
+        firstMap.put("max", "1000");
+        firstMap.put("count", "5");
+
+        Map<String, String> secondMap = new HashMap<>();
+        secondMap.put("min", "100");
+        secondMap.put("max", "1000");
+        secondMap.put("count", "1");
+
+        listOfMaps.add(firstMap);
+        listOfMaps.add(secondMap);
+
+        for (int i = 0; i < threadGroupNode.getChildCount(); i++) {
+            JMeterTreeNode controller = (JMeterTreeNode) threadGroupNode.getChildAt(i);
+            JMeterTreeNode request = (JMeterTreeNode) controller.getChildAt(1);
+            assertEquals("GET - /api/v1.0/random", request.getName());
+            HTTPSamplerProxy requestObject = (HTTPSamplerProxy) request.getUserObject();
+            assertEquals("https", requestObject.getProtocol());
+            assertEquals("www.randomnumberapi.com", requestObject.getDomain());
+            assertEquals(443, requestObject.getPort());
+            assertEquals("GET", requestObject.getMethod());
+            assertEquals("/api/v1.0/random", requestObject.getPath());
+            assertEquals("/api/v1.0/random", requestObject.getPath());
+            for (int j = 0; j < requestObject.getArguments().getArgumentCount(); j++) {
+                Argument arg = requestObject.getArguments().getArgument(j);
+                assertEquals(listOfMaps.get(i).get(arg.getName()), arg.getValue());
+            }
+        }
+    }
+
+    @Test
+    public void testHARImporter_header() {
+        JMeterTreeNode header = (JMeterTreeNode) threadGroupNode.getChildAt(1).getChildAt(1).getChildAt(0);
+        HeaderManager headerOject = (HeaderManager) header.getUserObject();
+        assertEquals(headerOject.getHeaders().size(), 16);
     }
 }

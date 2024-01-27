@@ -90,8 +90,8 @@ public class HARImporter {
                     lastTimestamp = harEntry.getStartedDateTime().getTime(); // first entry should become 0
                 }
 
-                lastTimestamp = harEntry.getStartedDateTime().getTime();
-                long timeDifference = harEntry.getStartedDateTime().getTime() - lastTimestamp;
+                long currentEntryStartTime = harEntry.getStartedDateTime().getTime();
+                long timeDifference = currentEntryStartTime - lastTimestamp;
 
                 // add a constant timer to simulate the think time
                 addComponent(createConstantTimer(timeDifference), transactionControllerNodeSub);
