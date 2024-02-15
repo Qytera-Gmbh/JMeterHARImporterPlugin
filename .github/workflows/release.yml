@@ -17,20 +17,20 @@ jobs:
         uses: actions/setup-java@v2
         with:
           java-version: '11'
-          distribution: 'adopt' # Specify the distribution type, e.g., 'adopt', 'adopt-hotspot', 'adopt-openj9'
+          distribution: 'adopt'
 
       - name: Build JAR
         run: mvn package
 
       - name: Read Release Notes
         id: release_notes
-        run: echo "::set-output name=notes::$(cat release-notes.txt)" # Adjust the path to your release notes file
+        run: echo "::set-output name=notes::$(cat release-notes.txt)"
 
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Required for authentication
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ github.ref }}
           release_name: Release ${{ github.ref }}
@@ -40,9 +40,9 @@ jobs:
         id: upload-release-asset
         uses: actions/upload-release-asset@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Required for authentication
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./target/your-plugin-name.jar # Adjust the path to your compiled JAR file
-          asset_name: your-plugin-name.jar
+          asset_path: ./target/jmeter-har-import-plugin-local.jar
+          asset_name: jmeter-har-import-plugin-${{ github.ref }}.jar
           asset_content_type: application/java-archive
