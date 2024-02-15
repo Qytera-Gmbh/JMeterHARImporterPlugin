@@ -6,7 +6,7 @@ The JMeter HAR Importer plugin allows users to import HTTP Archive (HAR) files i
 
 To install the JMeter HAR Importer plugin, follow these steps:
 
-1. Download the latest release of the plugin JAR file from the [GitHub releases page](https://github.com/your-username/your-repository/releases).
+1. Download the latest release of the plugin JAR file from the [GitHub releases page](https://github.com/Qytera-Gmbh/JMeterHARImporterPlugin/releases).
 2. Copy the downloaded JAR file to the "lib/ext" directory within your JMeter installation directory.
 3. Restart JMeter to load the plugin.
 
@@ -23,7 +23,7 @@ Once installed, follow these steps to import a HAR file into JMeter:
 
 ## Contributing
 
-Contributions to the JMeter HAR Importer plugin are welcome! If you encounter any bugs or have feature requests, please submit an issue on the [GitHub repository](https://github.com/your-username/your-repository/issues).
+Contributions to the JMeter HAR Importer plugin are welcome! If you encounter any bugs or have feature requests, please submit an issue on the [GitHub repository](https://github.com/Qytera-Gmbh/JMeterHARImporterPlugin/issues).
 
 ## License
 
