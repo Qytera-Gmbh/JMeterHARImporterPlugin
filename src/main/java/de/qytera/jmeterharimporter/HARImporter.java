@@ -105,6 +105,13 @@ public class HARImporter {
 
                 // add the cookie manager
                 addComponent(createCookieManager(harRequest), httpSamplerNode);
+
+                // add body
+                if (harRequest.getPostData() != null && harRequest.getPostData().getText() != null) {
+                    HTTPSamplerProxy httpSampler = (HTTPSamplerProxy) httpSamplerNode.getUserObject();
+                    httpSampler.setPostBodyRaw(true);
+                    httpSampler.addNonEncodedArgument("", harRequest.getPostData().getText(), "");
+                }
             }
 
             // Refresh the JMeter GUI

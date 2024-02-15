@@ -15,6 +15,7 @@ import org.apache.jmeter.gui.tree.JMeterTreeNode;
 import org.apache.jmeter.protocol.http.control.HeaderManager;
 import org.apache.jmeter.protocol.http.sampler.HTTPSamplerProxy;
 
+// tests GET and DELETE
 public class HARImporterGetTest {
 
     JMeterTreeNode threadGroupNode = null;
