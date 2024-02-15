@@ -1,9 +1,9 @@
 name: Release
 
 on:
-  push:
-    tags:
-      - 'v*' # Trigger the workflow on tag pushes that match the pattern 'v*'
+    push:
+      tags:
+        - 'v*' # Trigger the workflow on tag pushes that match the pattern 'v*'
 
 jobs:
   release:
@@ -22,10 +22,6 @@ jobs:
       - name: Build JAR
         run: mvn package
 
-      - name: Read Release Notes
-        id: release_notes
-        run: echo "::set-output name=notes::$(cat release-notes.txt)"
-
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
@@ -34,15 +30,22 @@ jobs:
         with:
           tag_name: ${{ github.ref }}
           release_name: Release ${{ github.ref }}
-          body: ${{ steps.release_notes.outputs.notes }}
-
-      - name: Upload JAR
-        id: upload-release-asset
+          body_path: release-notes.txt
+      
+      - name: Extract Tag Name
+        id: extract_tag_name
+        run: echo "TAG_NAME=$(echo "${{ github.ref }}" | cut -d '/' -f 3)" >> $GITHUB_ENV
+      
+      - name: Upload JAR and Properties
+        id: upload-release-assets
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./target/jmeter-har-import-plugin-local.jar
-          asset_name: jmeter-har-import-plugin-${{ github.ref }}.jar
+          asset_path: |
+            ./target/jmeter-har-import-plugin-local.jar
+          asset_name: |
+            jmeter-har-import-plugin-${{ env.TAG_NAME }}.jar
           asset_content_type: application/java-archive
+      
