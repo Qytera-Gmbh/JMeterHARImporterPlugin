@@ -67,7 +67,7 @@ Contributions to the JMeter HAR Importer plugin are welcome! If you encounter an
 
 ## License
 
-This plugin is licensed under the Apache License 2.0. See the [LICENSE](LICENSE) file for details.
+This plugin is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
 ## Deploy and Test
 
