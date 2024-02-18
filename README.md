@@ -27,20 +27,20 @@ Google Chrome offers a straightforward process for capturing HTTP Archive (HAR) 
 1. Navigate to the web page you wish to analyze.
 2. Open Chrome's Developer Tools by either:
    - Right-clicking on the page and selecting `Inspect`, or
-   - Using the keyboard shortcut `Ctrl+Shift+I` of `F12` (Windows/Linux) or `Cmd+Opt+I` (Mac).
+   - Using the keyboard shortcut `Ctrl+Shift+I` or `F12` (Windows/Linux) or `Cmd+Opt+I` (Mac).
 
 ### Step 2: Record Network Activity
 
 1. Go to the `Network` tab within the Developer Tools. Here, you'll see a record button (the red circle at the top-left corner of the tab). Ensure it's red to indicate recording is active. If it's grey, click it to start recording.
 2. Check the `Preserve log` box to keep the network log across page loads. This is particularly useful for capturing traffic on pages that perform automatic redirections or for comprehensive analysis across multiple page interactions.
-3. Refresh the webpage to start capturing the network traffic. It's essential to start with a clean slate to ensure you capture all relevant network activity from the beginning of the page load.
+3. Refresh the webpage to start capturing the network traffic. It's essential to start with a clean state to ensure you capture all relevant network activity from the beginning of the page load.
 
 ### Step 3: Save the HAR File
 
 1. Once you have recorded the necessary network activity, right-click anywhere within the grid of network requests and select `Save all as HAR with content`.
 2. Choose your desired location on your computer and save the file.
 
-This HAR file now contains a detailed record of all network requests and responses made during the recording, along with timing information, headers, cookies, and other critical data. This file can be used for further analysis, shared with team members for collaborative diagnostics, or imported into various tools that support HAR files for more in-depth performance evaluation.
+This HAR file now contains a detailed record of all network requests and responses made during the recording, along with timing information, headers, cookies, and other important data. This file can be used for further analysis, shared with team members for collaborative diagnostics, or imported into various tools that support HAR files for more in-depth performance evaluation.
 
 ## Installation
 
