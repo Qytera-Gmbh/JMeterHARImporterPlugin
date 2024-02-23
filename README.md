@@ -52,7 +52,7 @@ To install the JMeter HAR Importer plugin, follow these steps:
 
 Once installed, follow these steps to import a HAR file into JMeter:
 
-![](screenshot-usage.png)
+![](docs/img/screenshot-usage.png)
 
 1. Launch JMeter.
 2. Go to the "Tools" menu.
