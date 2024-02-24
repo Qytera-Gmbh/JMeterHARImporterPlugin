@@ -1,0 +1,37 @@
+package de.qytera.jmeterharimporter;
+
+import org.apache.jmeter.gui.tree.JMeterTreeNode;
+
+import javax.swing.tree.TreeNode;
+import java.util.Enumeration;
+import java.util.NoSuchElementException;
+
+public class NodeUtil {
+
+    private NodeUtil() {
+        // Utility class.
+    }
+
+    /**
+     * Retrieves the first child of a given node which is of the given class.
+     *
+     * @param node       the node
+     * @param childClass the child's class
+     * @param <T>        the expected class of the child node
+     * @return the child
+     */
+    public static <T> T getChild(TreeNode node, Class<T> childClass) {
+        Enumeration<? extends TreeNode> children = node.children();
+        while (children.hasMoreElements()) {
+            TreeNode child = children.nextElement();
+            if (child instanceof JMeterTreeNode jmeterNode) {
+                Object userObject = jmeterNode.getUserObject();
+                if (childClass.isInstance(userObject)) {
+                    return childClass.cast(userObject);
+                }
+            }
+        }
+        throw new NoSuchElementException("Node does not contain a child of class %s".formatted(childClass));
+    }
+
+}
