@@ -1,10 +1,8 @@
 package de.qytera.jmeterharimporter;
 
-import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Date;
-
+import de.sstoehr.harreader.HarReader;
+import de.sstoehr.harreader.HarReaderException;
+import de.sstoehr.harreader.model.*;
 import org.apache.jmeter.control.LoopController;
 import org.apache.jmeter.control.TransactionController;
 import org.apache.jmeter.control.gui.LoopControlPanel;
@@ -13,28 +11,27 @@ import org.apache.jmeter.gui.GuiPackage;
 import org.apache.jmeter.gui.tree.JMeterTreeModel;
 import org.apache.jmeter.gui.tree.JMeterTreeNode;
 import org.apache.jmeter.protocol.http.control.Cookie;
+import org.apache.jmeter.protocol.http.control.CookieManager;
+import org.apache.jmeter.protocol.http.control.Header;
 import org.apache.jmeter.protocol.http.control.HeaderManager;
 import org.apache.jmeter.protocol.http.control.gui.HttpTestSampleGui;
+import org.apache.jmeter.protocol.http.gui.CookiePanel;
 import org.apache.jmeter.protocol.http.gui.HeaderPanel;
 import org.apache.jmeter.protocol.http.sampler.HTTPSamplerProxy;
 import org.apache.jmeter.testelement.AbstractTestElement;
 import org.apache.jmeter.testelement.TestElement;
 import org.apache.jmeter.threads.ThreadGroup;
+import org.apache.jmeter.threads.gui.ThreadGroupGui;
 import org.apache.jmeter.timers.ConstantTimer;
 import org.apache.jmeter.timers.gui.ConstantTimerGui;
-import org.apache.jmeter.threads.gui.ThreadGroupGui;
-import org.apache.jmeter.protocol.http.control.CookieManager;
-import org.apache.jmeter.protocol.http.control.Header;
-import org.apache.jmeter.protocol.http.gui.CookiePanel;
-import de.sstoehr.harreader.model.HarCookie;
 
-import de.sstoehr.harreader.HarReader;
-import de.sstoehr.harreader.HarReaderException;
-import de.sstoehr.harreader.model.Har;
-import de.sstoehr.harreader.model.HarEntry;
-import de.sstoehr.harreader.model.HarHeader;
-import de.sstoehr.harreader.model.HarQueryParam;
-import de.sstoehr.harreader.model.HarRequest;
+import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URL;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 public class HARImporter {
     /**
@@ -43,11 +40,26 @@ public class HARImporter {
     private static final String THINK_TIME = "Think Time";
     private static final String HAR_IMPORTED = "HAR Imported";
     private Har har;
-    private GuiPackage guiPackage;
+    private final GuiPackage guiPackage;
+
+    private final Set<String> hostsIgnored = new HashSet<>();
+
+    /**
+     * Constructs a new importer based on the provided HAR data.
+     *
+     * @param har the HAR data
+     */
+    public HARImporter(Har har) {
+        this.har = har;
+        if (GuiPackage.getInstance() == null) {
+            GuiPackage.initInstance(null, new JMeterTreeModel());
+        }
+        this.guiPackage = GuiPackage.getInstance();
+    }
 
     /**
      * Constructor for the HARImporter class
-     * 
+     *
      * @param filePath
      */
     public HARImporter(String filePath) {
@@ -62,6 +74,23 @@ public class HARImporter {
         }
 
         this.guiPackage = GuiPackage.getInstance();
+    }
+
+    /**
+     * Adds a host to the set of ignored hosts. If a HAR entry contains the host in its request URL, the entry will be
+     * skipped during conversion.
+     *
+     * <pre>
+     * {@code
+     * // GET https://www.example.org/xyz?a=1&b=2
+     * importer.ignoreHost("www.example.org");
+     * }
+     * </pre>
+     *
+     * @param host the host to ignore
+     */
+    public void ignoreHost(String host) {
+        this.hostsIgnored.add(host);
     }
 
     /**
@@ -80,9 +109,13 @@ public class HARImporter {
             long lastTimestamp = -1;
             for (HarEntry harEntry : this.har.getLog().getEntries()) {
                 HarRequest harRequest = harEntry.getRequest();
+                URI uri = URI.create(harRequest.getUrl());
+                if (this.hostsIgnored.contains(uri.getHost())) {
+                    continue;
+                }
                 // add a transaction controller for each entry to group the samplers
                 JMeterTreeNode transactionControllerNodeSub = addComponent(createTransactionController(
-                        String.format("TC.%03d - " + new URL(harRequest.getUrl()).getHost(), i++)),
+                                "TC.%03d - %s".formatted(i++, uri.getHost())),
                         threadGroupNode);
 
                 // calculate think time
@@ -138,7 +171,7 @@ public class HARImporter {
 
     private CookieManager createCookieManager(HarRequest harRequest) {
         CookieManager cookieManager = null;
-        if (harRequest.getCookies().size() > 0) {
+        if (!harRequest.getCookies().isEmpty()) {
             cookieManager = new CookieManager();
             cookieManager.setName("browser-cookies");
             cookieManager.setProperty(TestElement.TEST_CLASS, CookieManager.class.getName());
@@ -158,7 +191,7 @@ public class HARImporter {
 
     private HeaderManager createHeaderManager(HarRequest harRequest) {
         HeaderManager headerManager = null;
-        if (harRequest.getHeaders().size() > 0) {
+        if (!harRequest.getHeaders().isEmpty()) {
             // Create Header Manager
             headerManager = new HeaderManager();
             headerManager.setName("browser-headers");
