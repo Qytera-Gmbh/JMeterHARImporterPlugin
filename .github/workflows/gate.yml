@@ -1,0 +1,34 @@
+name: Gate
+
+on:
+  pull_request: 
+    branches: 
+      - main
+  push:
+    branches:
+      - main
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Set up JDK
+        uses: actions/setup-java@v2
+        with:
+          java-version: '17'
+          distribution: 'adopt'
+
+      - name: Build with Maven
+        run: mvn package
+    
+      - name: Publish Unit Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v1
+        with:
+          files: target/surefire-reports/*.xml
+          check_name: Test Results
+        if: always()
+      
