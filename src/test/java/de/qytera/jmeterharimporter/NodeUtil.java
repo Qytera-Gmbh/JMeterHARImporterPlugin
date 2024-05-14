@@ -24,8 +24,8 @@ public class NodeUtil {
         Enumeration<? extends TreeNode> children = node.children();
         while (children.hasMoreElements()) {
             TreeNode child = children.nextElement();
-            if (child instanceof JMeterTreeNode jmeterNode) {
-                Object userObject = jmeterNode.getUserObject();
+            if (child instanceof JMeterTreeNode) {
+                Object userObject = ((JMeterTreeNode)child).getUserObject();
                 if (childClass.isInstance(userObject)) {
                     return childClass.cast(userObject);
                 }
