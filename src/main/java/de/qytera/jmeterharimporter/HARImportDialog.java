@@ -14,10 +14,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.io.IOException;
 import java.net.URI;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -34,12 +31,12 @@ public class HARImportDialog implements MenuCreator, ActionListener {
     private static final int MINIMUM_DIALOG_WIDTH = 500;
     private static final int MINIMUM_DIALOG_HEIGHT = 400;
     private static final int MINIMUM_ELEMENT_HEIGHT = 30;
-    private static final String HAR_IMPORTER_CONFIG = "har-importer.txt";
 
     private final JDialog importDialog;
     private final JTextField harInputField;
     private final JPanel ignoredHostsPanel;
     private final JButton importButton;
+    private final JCheckBox addTimerCheckbox;
 
     /**
      * Maps hosts to their corresponding checkboxes.
@@ -100,13 +97,34 @@ public class HARImportDialog implements MenuCreator, ActionListener {
         gbc.fill = GridBagConstraints.BOTH;
         importForm.add(hostsScrollPane, gbc);
 
+        // add options
+        JPanel optionsPanel = new JPanel();
+        TitledBorder optionsPanelBorder = BorderFactory.createTitledBorder("Options");
+        optionsPanelBorder.setTitleJustification(TitledBorder.DEFAULT_JUSTIFICATION);
+        optionsPanelBorder.setTitlePosition(TitledBorder.DEFAULT_POSITION);
+        optionsPanel.setBorder(optionsPanelBorder);
+        optionsPanel.setLayout(new BorderLayout(0, 0));
+        optionsPanel.setMinimumSize(new Dimension(MINIMUM_DIALOG_WIDTH, MINIMUM_ELEMENT_HEIGHT * 2));
+        optionsPanel.setPreferredSize(new Dimension(MINIMUM_DIALOG_WIDTH, MINIMUM_ELEMENT_HEIGHT * 2));
+
+        addTimerCheckbox = new JCheckBox("Add Waiting Time");
+        optionsPanel.add(addTimerCheckbox);
+        addTimerCheckbox.setSelected(true);
+
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        gbc.weightx = 0.0;
+        gbc.weighty = 0.0;
+        gbc.fill = GridBagConstraints.BOTH;
+        importForm.add(optionsPanel, gbc);
+
         // Dialog actions area.
         JPanel dialogActionsPanel = new JPanel();
         dialogActionsPanel.setLayout(new GridBagLayout());
         dialogActionsPanel.setMinimumSize(new Dimension(MINIMUM_DIALOG_WIDTH, MINIMUM_ELEMENT_HEIGHT));
         dialogActionsPanel.setPreferredSize(new Dimension(MINIMUM_DIALOG_WIDTH, MINIMUM_ELEMENT_HEIGHT));
         gbc.gridx = 0;
-        gbc.gridy = 2;
+        gbc.gridy = 3;
         gbc.weightx = 0.0;
         gbc.weighty = 0.0;
         gbc.fill = GridBagConstraints.BOTH;
@@ -190,12 +208,6 @@ public class HARImportDialog implements MenuCreator, ActionListener {
                     importButton.setEnabled(false);
                 }
             }
-
-            try {
-                Files.write(Paths.get(HAR_IMPORTER_CONFIG), harInputField.getText().getBytes());
-            } catch (IOException e1) {
-                e1.printStackTrace();
-            }
         });
         cancelButton.addActionListener(e -> importDialog.dispose());
 
@@ -206,7 +218,7 @@ public class HARImportDialog implements MenuCreator, ActionListener {
                     importer.ignoreHost(host);
                 }
             });
-            importer.addNewThreadGroupWithSamplers();
+            importer.addNewThreadGroupWithSamplers(addTimerCheckbox.isSelected());
             importDialog.dispose();
         });
     }
