@@ -97,9 +97,11 @@ public class HARImporter {
     /**
      * Adds a new Thread Group to the JMeter tree and adds a HTTP Sampler for each
      * HAR entry
+     * 
+     * @return the root node of the JMeter tree
      */
     public JMeterTreeNode addNewThreadGroupWithSamplers() {
-        return addNewThreadGroupWithSamplers(true);
+        return addNewThreadGroupWithSamplers(true, true);
     }
 
     /**
@@ -107,8 +109,10 @@ public class HARImporter {
      * HAR entry
      *
      * @param shouldAddThinkTime whether to add think time between the requests
+     * @param shouldAddHeader    whether to add the recorded headers to the requests
+     * @return the root node of the JMeter tree
      */
-    public JMeterTreeNode addNewThreadGroupWithSamplers(Boolean shouldAddThinkTime) {
+    public JMeterTreeNode addNewThreadGroupWithSamplers(Boolean shouldAddThinkTime, Boolean shouldAddHeader) {
         try {
             // Get the root node of the JMeter tree
             JMeterTreeNode root = (JMeterTreeNode) this.guiPackage.getTreeModel().getRoot();

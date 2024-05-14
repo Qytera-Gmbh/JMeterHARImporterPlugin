@@ -37,6 +37,7 @@ public class HARImportDialog implements MenuCreator, ActionListener {
     private final JPanel ignoredHostsPanel;
     private final JButton importButton;
     private final JCheckBox addTimerCheckbox;
+    private final JCheckBox addHeaderCheckbox;
 
     /**
      * Maps hosts to their corresponding checkboxes.
@@ -109,7 +110,9 @@ public class HARImportDialog implements MenuCreator, ActionListener {
 
         addTimerCheckbox = new JCheckBox("Add Waiting Time");
         optionsPanel.add(addTimerCheckbox);
-        addTimerCheckbox.setSelected(true);
+
+        addHeaderCheckbox = new JCheckBox("Add Recorded Headers");
+        optionsPanel.add(addHeaderCheckbox);
 
         gbc.gridx = 0;
         gbc.gridy = 2;
@@ -218,7 +221,8 @@ public class HARImportDialog implements MenuCreator, ActionListener {
                     importer.ignoreHost(host);
                 }
             });
-            importer.addNewThreadGroupWithSamplers(addTimerCheckbox.isSelected());
+        addHeaderCheckbox.setSelected(true);
+        importer.addNewThreadGroupWithSamplers(addTimerCheckbox.isSelected(), addHeaderCheckbox.isSelected());
             importDialog.dispose();
         });
     }
