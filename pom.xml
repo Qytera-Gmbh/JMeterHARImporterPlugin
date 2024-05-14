@@ -90,7 +90,8 @@
                         <configuration>
                             <target>
                                 <!-- Copy the built JAR to JMeter's lib/ext directory -->
-                                <copy file="${project.build.directory}/${project.artifactId}-${project.version}.jar"
+                                <copy
+                                    file="${project.build.directory}/${project.artifactId}-${project.version}.jar"
                                     todir="${jmeter.path}/lib/ext" />
                             </target>
                         </configuration>
@@ -100,6 +101,6 @@
                     </execution>
                 </executions>
             </plugin>
-                    </plugins>
+        </plugins>
     </build>
 </project>
