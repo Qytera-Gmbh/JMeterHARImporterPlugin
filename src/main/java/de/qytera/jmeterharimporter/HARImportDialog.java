@@ -38,6 +38,7 @@ public class HARImportDialog implements MenuCreator, ActionListener {
     private final JButton importButton;
     private final JCheckBox addTimerCheckbox;
     private final JCheckBox addHeaderCheckbox;
+    private final JCheckBox addCookiesCheckbox;
 
     /**
      * Maps hosts to their corresponding checkboxes.
@@ -104,15 +105,18 @@ public class HARImportDialog implements MenuCreator, ActionListener {
         optionsPanelBorder.setTitleJustification(TitledBorder.DEFAULT_JUSTIFICATION);
         optionsPanelBorder.setTitlePosition(TitledBorder.DEFAULT_POSITION);
         optionsPanel.setBorder(optionsPanelBorder);
-        optionsPanel.setLayout(new BorderLayout(0, 0));
-        optionsPanel.setMinimumSize(new Dimension(MINIMUM_DIALOG_WIDTH, MINIMUM_ELEMENT_HEIGHT * 2));
-        optionsPanel.setPreferredSize(new Dimension(MINIMUM_DIALOG_WIDTH, MINIMUM_ELEMENT_HEIGHT * 2));
+        optionsPanel.setLayout(new BoxLayout(optionsPanel, BoxLayout.Y_AXIS));
+        optionsPanel.setMinimumSize(new Dimension(MINIMUM_DIALOG_WIDTH, MINIMUM_ELEMENT_HEIGHT * 3));
+        optionsPanel.setPreferredSize(new Dimension(MINIMUM_DIALOG_WIDTH, MINIMUM_ELEMENT_HEIGHT * 3));
 
-        addTimerCheckbox = new JCheckBox("Add Waiting Time");
+        addTimerCheckbox = new JCheckBox("Add Recorded Waiting Time");
         optionsPanel.add(addTimerCheckbox);
 
         addHeaderCheckbox = new JCheckBox("Add Recorded Headers");
         optionsPanel.add(addHeaderCheckbox);
+
+        addCookiesCheckbox = new JCheckBox("Add Recorded Cookies");
+        optionsPanel.add(addCookiesCheckbox);
 
         gbc.gridx = 0;
         gbc.gridy = 2;
@@ -221,8 +225,7 @@ public class HARImportDialog implements MenuCreator, ActionListener {
                     importer.ignoreHost(host);
                 }
             });
-        addHeaderCheckbox.setSelected(true);
-        importer.addNewThreadGroupWithSamplers(addTimerCheckbox.isSelected(), addHeaderCheckbox.isSelected());
+        importer.addNewThreadGroupWithSamplers(addTimerCheckbox.isSelected(), addHeaderCheckbox.isSelected(), addCookiesCheckbox.isSelected());
             importDialog.dispose();
         });
     }

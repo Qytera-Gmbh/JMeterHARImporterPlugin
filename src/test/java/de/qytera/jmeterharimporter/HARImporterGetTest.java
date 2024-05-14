@@ -58,7 +58,7 @@ public class HARImporterGetTest {
     @Test
     public void testHARImporter_no_timer() {
         HARImporter harImporter = new HARImporter("src/test/resources/get-www.randomnumberapi.com.har");
-        threadGroupNode = harImporter.addNewThreadGroupWithSamplers(false, false);
+        threadGroupNode = harImporter.addNewThreadGroupWithSamplers(false, false, false);
 
         String[] timerDelays = { "0", "8293" };
 
@@ -116,7 +116,7 @@ public class HARImporterGetTest {
     @Test
     public void testHARImporter_no_header() {
         HARImporter harImporter = new HARImporter("src/test/resources/get-www.randomnumberapi.com.har");
-        threadGroupNode = harImporter.addNewThreadGroupWithSamplers(false, false);
+        threadGroupNode = harImporter.addNewThreadGroupWithSamplers(false, false, false);
         
         boolean isHeaderAvailable = true;
 
