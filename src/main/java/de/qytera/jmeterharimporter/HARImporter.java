@@ -93,11 +93,22 @@ public class HARImporter {
         this.hostsIgnored.add(host);
     }
 
+    
     /**
      * Adds a new Thread Group to the JMeter tree and adds a HTTP Sampler for each
      * HAR entry
      */
     public JMeterTreeNode addNewThreadGroupWithSamplers() {
+        return addNewThreadGroupWithSamplers(true);
+    }
+
+    /**
+     * Adds a new Thread Group to the JMeter tree and adds a HTTP Sampler for each
+     * HAR entry
+     *
+     * @param shouldAddThinkTime whether to add think time between the requests
+     */
+    public JMeterTreeNode addNewThreadGroupWithSamplers(Boolean shouldAddThinkTime) {
         try {
             // Get the root node of the JMeter tree
             JMeterTreeNode root = (JMeterTreeNode) this.guiPackage.getTreeModel().getRoot();
@@ -127,7 +138,9 @@ public class HARImporter {
                 long timeDifference = currentEntryStartTime - lastTimestamp;
 
                 // add a constant timer to simulate the think time
-                addComponent(createConstantTimer(timeDifference), transactionControllerNodeSub);
+                if (shouldAddThinkTime) {
+                    addComponent(createConstantTimer(timeDifference), transactionControllerNodeSub);
+                }
 
                 // add the http sampler
                 JMeterTreeNode httpSamplerNode = addComponent(createHttpSampler(harRequest),

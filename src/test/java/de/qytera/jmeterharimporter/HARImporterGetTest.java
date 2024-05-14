@@ -3,6 +3,7 @@ package de.qytera.jmeterharimporter;
 import org.junit.Before;
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -50,6 +51,22 @@ public class HARImporterGetTest {
             assertEquals("Think Time", timer.getName());
             ConstantTimer timerObject = (ConstantTimer) timer.getUserObject();
             assertEquals(timerDelays[i], timerObject.getDelay());
+        }
+    }
+
+    @Test
+    public void testHARImporter_no_timer() {
+        HARImporter harImporter = new HARImporter("src/test/resources/get-www.randomnumberapi.com.har");
+        threadGroupNode = harImporter.addNewThreadGroupWithSamplers(false);
+
+        String[] timerDelays = { "0", "8293" };
+
+        assertEquals(timerDelays.length, threadGroupNode.getChildCount());
+
+        for (int i = 0; i < timerDelays.length; i++) {
+            JMeterTreeNode controller = (JMeterTreeNode) threadGroupNode.getChildAt(i);
+            JMeterTreeNode timer = (JMeterTreeNode) controller.getChildAt(0);
+            assertNotEquals("Think Time", timer.getName());
         }
     }
 
