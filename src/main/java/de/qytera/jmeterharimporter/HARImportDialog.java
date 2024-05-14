@@ -162,6 +162,7 @@ public class HARImportDialog implements MenuCreator, ActionListener {
             if (fileChooser.showOpenDialog(importDialog) == JFileChooser.APPROVE_OPTION) {
                 harInputField.setText(fileChooser.getSelectedFile().getAbsolutePath());
                 try {
+                    clearPanel();
                     this.har = new HarReader().readFromFile(new File(harInputField.getText()));
                     this.har.getLog().getEntries().stream()
                             .map(HarEntry::getRequest)
@@ -208,6 +209,13 @@ public class HARImportDialog implements MenuCreator, ActionListener {
             importer.addNewThreadGroupWithSamplers();
             importDialog.dispose();
         });
+    }
+
+    public void clearPanel() {
+        this.ignoredHostsPanel.removeAll();
+        // Revalidate and repaint the panel to reflect the changes.
+        this.ignoredHostsPanel.revalidate();
+        this.ignoredHostsPanel.repaint();
     }
 
     @Override
