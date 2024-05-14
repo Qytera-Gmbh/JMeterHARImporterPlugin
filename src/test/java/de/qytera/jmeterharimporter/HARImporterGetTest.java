@@ -3,6 +3,7 @@ package de.qytera.jmeterharimporter;
 import org.junit.Before;
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 
 import java.util.ArrayList;
@@ -57,7 +58,7 @@ public class HARImporterGetTest {
     @Test
     public void testHARImporter_no_timer() {
         HARImporter harImporter = new HARImporter("src/test/resources/get-www.randomnumberapi.com.har");
-        threadGroupNode = harImporter.addNewThreadGroupWithSamplers(false);
+        threadGroupNode = harImporter.addNewThreadGroupWithSamplers(false, false);
 
         String[] timerDelays = { "0", "8293" };
 
@@ -110,5 +111,21 @@ public class HARImporterGetTest {
         JMeterTreeNode header = (JMeterTreeNode) threadGroupNode.getChildAt(1).getChildAt(1).getChildAt(0);
         HeaderManager headerOject = (HeaderManager) header.getUserObject();
         assertEquals(headerOject.getHeaders().size(), 16);
+    }
+
+    @Test
+    public void testHARImporter_no_header() {
+        HARImporter harImporter = new HARImporter("src/test/resources/get-www.randomnumberapi.com.har");
+        threadGroupNode = harImporter.addNewThreadGroupWithSamplers(false, false);
+        
+        boolean isHeaderAvailable = true;
+
+        try {
+            threadGroupNode.getChildAt(1).getChildAt(1).getChildAt(0);
+        } catch (Exception e) {
+            isHeaderAvailable = false;
+        }
+
+        assertFalse(isHeaderAvailable);
     }
 }
