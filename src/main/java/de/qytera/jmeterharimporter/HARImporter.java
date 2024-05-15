@@ -18,6 +18,8 @@ import org.apache.jmeter.protocol.http.control.gui.HttpTestSampleGui;
 import org.apache.jmeter.protocol.http.gui.CookiePanel;
 import org.apache.jmeter.protocol.http.gui.HeaderPanel;
 import org.apache.jmeter.protocol.http.sampler.HTTPSamplerProxy;
+import org.apache.jmeter.sampler.TestAction;
+import org.apache.jmeter.sampler.gui.TestActionGui;
 import org.apache.jmeter.testelement.AbstractTestElement;
 import org.apache.jmeter.testelement.TestElement;
 import org.apache.jmeter.threads.ThreadGroup;
@@ -155,7 +157,7 @@ public class HARImporter {
                 if (shouldAddThinkTime) {
                     if (transactionControllerHasTimer.get(timeDifference) == null) {
                         transactionControllerHasTimer.put(timeDifference, true);
-                        addComponent(createConstantTimer(timeDifference), transactionControllerNodeSub);
+                        addComponent(createFlowControlAction(timeDifference), transactionControllerNodeSub);
                     }
                 }
 
@@ -261,6 +263,19 @@ public class HARImporter {
         return httpSampler;
     }
 
+    private TestAction createFlowControlAction(long time){
+        TestAction testAction = new TestAction();
+        testAction.setName(THINK_TIME);
+        testAction.setAction(1);
+        testAction.setTarget(0);
+        testAction.setDuration(String.valueOf(time));
+        testAction.setProperty(TestElement.TEST_CLASS, TestAction.class.getName());
+        testAction.setProperty(TestElement.GUI_CLASS, TestActionGui.class.getName());
+
+        return testAction;
+    }
+
+    @SuppressWarnings("unused")
     private ConstantTimer createConstantTimer(long time) {
         ConstantTimer constantTimer = new ConstantTimer();
         constantTimer.setName(THINK_TIME);

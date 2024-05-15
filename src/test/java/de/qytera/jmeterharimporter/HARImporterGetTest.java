@@ -16,6 +16,7 @@ import org.apache.jmeter.config.Argument;
 import org.apache.jmeter.gui.tree.JMeterTreeNode;
 import org.apache.jmeter.protocol.http.control.HeaderManager;
 import org.apache.jmeter.protocol.http.sampler.HTTPSamplerProxy;
+import org.apache.jmeter.sampler.TestAction;
 
 // tests GET and DELETE
 public class HARImporterGetTest {
@@ -50,8 +51,8 @@ public class HARImporterGetTest {
             JMeterTreeNode controller = (JMeterTreeNode) threadGroupNode.getChildAt(i);
             JMeterTreeNode timer = (JMeterTreeNode) controller.getChildAt(0);
             assertEquals("Think Time", timer.getName());
-            ConstantTimer timerObject = (ConstantTimer) timer.getUserObject();
-            assertEquals(timerDelays[i], timerObject.getDelay());
+            TestAction timerObject = (TestAction) timer.getUserObject();
+            assertEquals(timerDelays[i], timerObject.getDurationAsString());
         }
     }
 
