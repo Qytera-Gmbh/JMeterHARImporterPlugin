@@ -11,7 +11,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.jmeter.timers.ConstantTimer;
 import org.apache.jmeter.config.Argument;
 import org.apache.jmeter.gui.tree.JMeterTreeNode;
 import org.apache.jmeter.protocol.http.control.HeaderManager;
@@ -46,6 +45,23 @@ public class HARImporterGetTest {
         String[] timerDelays = { "0", "8293" };
 
         assertEquals(timerDelays.length, threadGroupNode.getChildCount());
+
+        for (int i = 0; i < timerDelays.length; i++) {
+            JMeterTreeNode controller = (JMeterTreeNode) threadGroupNode.getChildAt(i);
+            JMeterTreeNode timer = (JMeterTreeNode) controller.getChildAt(0);
+            assertEquals("Think Time", timer.getName());
+            TestAction timerObject = (TestAction) timer.getUserObject();
+            assertEquals(timerDelays[i], timerObject.getDurationAsString());
+        }
+    }
+
+    @Test
+    public void testHARImporter_timer_grouping() {
+        HARImporter harImporter = new HARImporter("src/test/resources/www.qytera.de.har");
+        threadGroupNode = harImporter.addNewThreadGroupWithSamplers(true, false, false);
+
+
+        String[] timerDelays = { "0", "1", "78", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "20" };
 
         for (int i = 0; i < timerDelays.length; i++) {
             JMeterTreeNode controller = (JMeterTreeNode) threadGroupNode.getChildAt(i);

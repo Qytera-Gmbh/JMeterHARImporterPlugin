@@ -139,24 +139,28 @@ public class HARImporter {
                 long currentEntryStartTime = harEntry.getStartedDateTime().getTime();
                 long timeDifference = currentEntryStartTime - lastTimestamp;
 
+                if (transactionControllerHasTimer.get(currentEntryStartTime) == null) {
+                    lastTimestamp = currentEntryStartTime;
+                }
+
                 HarRequest harRequest = harEntry.getRequest();
                 URI uri = URI.create(harRequest.getUrl());
                 if (this.hostsIgnored.contains(uri.getHost())) {
                     continue;
                 }
                 // add a transaction controller for each entry to group the samplers
-                if (transactionControllers.get(timeDifference) == null) {
+                if (transactionControllers.get(currentEntryStartTime) == null) {
                     TransactionController transactionController = createTransactionController("TC.%03d - %s".formatted(i++, uri.getHost()));
                     JMeterTreeNode transactionControllerNodeSub = addComponent(transactionController, threadGroupNode);
-                    transactionControllers.put(timeDifference, transactionControllerNodeSub);
+                    transactionControllers.put(currentEntryStartTime, transactionControllerNodeSub);
                 }
 
-                JMeterTreeNode transactionControllerNodeSub = transactionControllers.get(timeDifference);
+                JMeterTreeNode transactionControllerNodeSub = transactionControllers.get(currentEntryStartTime);
 
                 // add a constant timer to simulate the think time
                 if (shouldAddThinkTime) {
-                    if (transactionControllerHasTimer.get(timeDifference) == null) {
-                        transactionControllerHasTimer.put(timeDifference, true);
+                    if (transactionControllerHasTimer.get(currentEntryStartTime) == null) {
+                        transactionControllerHasTimer.put(currentEntryStartTime, true);
                         addComponent(createFlowControlAction(timeDifference), transactionControllerNodeSub);
                     }
                 }
