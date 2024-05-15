@@ -30,7 +30,9 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 public class HARImporter {
@@ -121,19 +123,12 @@ public class HARImporter {
             // Create a Thread Group to hold the requests
             JMeterTreeNode threadGroupNode = addComponent(createThreadGroup(), root);
 
+            Map<Long, JMeterTreeNode> transactionControllers = new HashMap<>();
+            Map<Long, Boolean> transactionControllerHasTimer = new HashMap<>();
+
             int i = 1;
             long lastTimestamp = -1;
             for (HarEntry harEntry : this.har.getLog().getEntries()) {
-                HarRequest harRequest = harEntry.getRequest();
-                URI uri = URI.create(harRequest.getUrl());
-                if (this.hostsIgnored.contains(uri.getHost())) {
-                    continue;
-                }
-                // add a transaction controller for each entry to group the samplers
-                JMeterTreeNode transactionControllerNodeSub = addComponent(createTransactionController(
-                                "TC.%03d - %s".formatted(i++, uri.getHost())),
-                        threadGroupNode);
-
                 // calculate think time
                 if (lastTimestamp == -1) {
                     lastTimestamp = harEntry.getStartedDateTime().getTime(); // first entry should become 0
@@ -142,9 +137,26 @@ public class HARImporter {
                 long currentEntryStartTime = harEntry.getStartedDateTime().getTime();
                 long timeDifference = currentEntryStartTime - lastTimestamp;
 
+                HarRequest harRequest = harEntry.getRequest();
+                URI uri = URI.create(harRequest.getUrl());
+                if (this.hostsIgnored.contains(uri.getHost())) {
+                    continue;
+                }
+                // add a transaction controller for each entry to group the samplers
+                if (transactionControllers.get(timeDifference) == null) {
+                    TransactionController transactionController = createTransactionController("TC.%03d - %s".formatted(i++, uri.getHost()));
+                    JMeterTreeNode transactionControllerNodeSub = addComponent(transactionController, threadGroupNode);
+                    transactionControllers.put(timeDifference, transactionControllerNodeSub);
+                }
+
+                JMeterTreeNode transactionControllerNodeSub = transactionControllers.get(timeDifference);
+
                 // add a constant timer to simulate the think time
                 if (shouldAddThinkTime) {
-                    addComponent(createConstantTimer(timeDifference), transactionControllerNodeSub);
+                    if (transactionControllerHasTimer.get(timeDifference) == null) {
+                        transactionControllerHasTimer.put(timeDifference, true);
+                        addComponent(createConstantTimer(timeDifference), transactionControllerNodeSub);
+                    }
                 }
 
                 // add the http sampler

@@ -1,19 +1,19 @@
 Release Notes
 
 Product Name: JMeter HAR Importer
-Release Number: Version 0.4.0
+Release Number: Version 0.2.0
 Release Date: [2024-05-14]
 
 Overview:
-The JMeter HAR Importer plugin is designed to facilitate the import of HTTP Archive (HAR) files into JMeter. This release introduces essential features for importing HAR files and generating JMeter sampler elements based on the captured requests.
+The JMeter HAR Importer plugin is designed to facilitate the import of HTTP Archive (HAR) files into JMeter. This release introduces option for en/disabling some options which were always active before.
 
 Purpose:
-This release note provides an overview of the purpose and features included in Version 0.4.0 of the JMeter HAR Importer plugin. It outlines the changes, bug fixes, and new features introduced in this release.
+This release note provides an overview of the purpose and features included in Version 0.2.0 of the JMeter HAR Importer plugin. It outlines the changes, bug fixes, and new features introduced in this release.
 
 Issue Summary:
 - The importer has a host exclude list now
 - Added multiple options for elements to be added or excluded.
-- Groups http samplers into the same transaction controller, if they happen at the same time.
+- Groups http samplers into the same transaction controller, if they were recorded at the same time.
 
 Notes:
 - For detailed instructions on installation and usage, refer to the plugin documentation.
