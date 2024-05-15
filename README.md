@@ -44,9 +44,8 @@ This HAR file now contains a detailed record of all network requests and respons
 
 To install the JMeter HAR Importer plugin, follow these steps:
 
-1. Download the latest release of the plugin JAR file from the [GitHub releases page](https://github.com/Qytera-Gmbh/JMeterHARImporterPlugin/releases).
-2. Copy the downloaded JAR file to the "lib/ext" directory within your JMeter installation directory.
-3. Restart JMeter to load the plugin.
+1. In JMeter install the Plugins Manager
+2. Choose the "HAR (HTTP Archive) Import" plugin
 
 # Usage
 
