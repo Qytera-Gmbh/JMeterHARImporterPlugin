@@ -31,7 +31,7 @@ public class NodeUtil {
                 }
             }
         }
-        throw new NoSuchElementException("Node does not contain a child of class %s".formatted(childClass));
+        throw new NoSuchElementException(String.format("Node does not contain a child of class %s", childClass.getName()));
     }
 
 }
