@@ -1,18 +1,17 @@
 Release Notes
 
 Product Name: JMeter HAR Importer
-Release Number: Version 0.2.2
-Release Date: [2024-05-14]
+Release Number: Version 0.2.3
+Release Date: [2024-07-19]
 
 Overview:
 The JMeter HAR Importer plugin is designed to facilitate the import of HTTP Archive (HAR) files into JMeter. This release fixes the an issue with timers after adding the grouping functionality.
 
 Purpose:
-This release note provides an overview of the purpose and features included in Version 0.2.2 of the JMeter HAR Importer plugin. It outlines the changes, bug fixes, and new features introduced in this release.
+This release note provides an overview of the purpose and features included in Version 0.2.3 of the JMeter HAR Importer plugin. It outlines the changes, bug fixes, and new features introduced in this release.
 
 Issue Summary:
-- Fix bug with ConstantTimers: now with grouping HTTP samplers into one transaction, a constant timer is not solving the "think time" problem. Instead a Flow Control Action was added. The Flow Time delay was wrongly calculated though.
-
+- Fix bug with Java version incompatibility where a Java 15 function was used in a Java 8 context
 Notes:
 - For detailed instructions on installation and usage, refer to the plugin documentation.
 - Please report any bugs or feedback to the project's GitHub repository.

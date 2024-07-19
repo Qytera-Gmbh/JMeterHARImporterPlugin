@@ -150,7 +150,7 @@ public class HARImporter {
                 }
                 // add a transaction controller for each entry to group the samplers
                 if (transactionControllers.get(currentEntryStartTime) == null) {
-                    TransactionController transactionController = createTransactionController("TC.%03d - %s".formatted(i++, uri.getHost()));
+                    TransactionController transactionController = createTransactionController(String.format("TC.%03d - %s", i++, uri.getHost()));
                     JMeterTreeNode transactionControllerNodeSub = addComponent(transactionController, threadGroupNode);
                     transactionControllers.put(currentEntryStartTime, transactionControllerNodeSub);
                 }
