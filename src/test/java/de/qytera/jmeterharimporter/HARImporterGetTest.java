@@ -145,4 +145,19 @@ public class HARImporterGetTest {
 
         assertFalse(isHeaderAvailable);
     }
+
+    @Test
+    public void testHARImporter_cookie_no_expiry() {
+        boolean exceptionThrown = false;
+
+        try {
+            HARImporter harImporter = new HARImporter("src/test/resources/cookie-no-expiry-date.har");
+            threadGroupNode = harImporter.addNewThreadGroupWithSamplers(false, false, true);
+        } catch (Exception e) {
+            e.printStackTrace();
+            exceptionThrown = true;
+        }
+
+        assertFalse(exceptionThrown);
+    }
 }

@@ -217,10 +217,18 @@ public class HARImporter {
             cookieManager.setProperty(TestElement.TEST_CLASS, CookieManager.class.getName());
             cookieManager.setProperty(TestElement.GUI_CLASS, CookiePanel.class.getName());
             for (HarCookie cookie : harRequest.getCookies()) {
-                long expiration = cookie.getExpires().getTime() - (new Date()).getTime();
-                cookieManager.add(new Cookie(cookie.getName(), cookie.getValue(), cookie.getDomain(),
-                        cookie.getPath(), cookie.getSecure(), expiration, cookie.getPath().length() > 0,
-                        cookie.getDomain().length() > 0));
+                long expiration = Long.MAX_VALUE;
+                if (cookie.getExpires() != null) {
+                    expiration = cookie.getExpires().getTime() - (new Date()).getTime();
+                }
+
+                boolean isSecure = cookie.getSecure() != null ? cookie.getSecure() : false;
+                String path = cookie.getPath() != null ? cookie.getPath() : "";
+                String domain = cookie.getDomain() != null ? cookie.getDomain() : "";
+                
+                cookieManager.add(new Cookie(cookie.getName(), cookie.getValue(), domain,
+                        path, isSecure, expiration, path.length() > 0,
+                        domain.length() > 0));
             }
 
             cookieManager.setClearEachIteration(true);
