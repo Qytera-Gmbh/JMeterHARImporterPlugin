@@ -1,17 +1,17 @@
 Release Notes
 
 Product Name: JMeter HAR Importer
-Release Number: Version 0.2.5
+Release Number: Version 0.2.6
 Release Date: [2024-07-19]
 
 Overview:
 The JMeter HAR Importer plugin is designed to facilitate the import of HTTP Archive (HAR) files into JMeter. This release fixes the an issue with timers after adding the grouping functionality.
 
 Purpose:
-This release note provides an overview of the purpose and features included in Version 0.2.5 of the JMeter HAR Importer plugin. It outlines the changes, bug fixes, and new features introduced in this release.
+This release note provides an overview of the purpose and features included in Version 0.2.6 of the JMeter HAR Importer plugin. It outlines the changes, bug fixes, and new features introduced in this release.
 
 Issue Summary:
-- Fix bug with empty Cookie fields/null values
+- Fix bug for data URIs, e.g. from embedded SVG files
 Notes:
 - For detailed instructions on installation and usage, refer to the plugin documentation.
 - Please report any bugs or feedback to the project's GitHub repository.
