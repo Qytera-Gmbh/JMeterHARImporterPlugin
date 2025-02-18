@@ -17,6 +17,7 @@ import java.io.File;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * This class implements the MenuCreator and ActionListener interfaces to create a menu item in JMeter's Tools menu
@@ -192,8 +193,10 @@ public class HARImportDialog implements MenuCreator, ActionListener {
                     this.har.getLog().getEntries().stream()
                             .map(HarEntry::getRequest)
                             .map(HarRequest::getUrl)
+                            .filter(url -> !url.startsWith("data:"))
                             .map(URI::create)
                             .map(URI::getHost)
+                            .filter(Objects::nonNull)
                             .distinct()
                             .sorted()
                             .forEach(host -> {
