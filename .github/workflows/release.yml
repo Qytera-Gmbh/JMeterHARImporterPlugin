@@ -5,6 +5,12 @@ on:
       tags:
         - 'v*' # Trigger the workflow on tag pushes that match the pattern 'v*'
 
+permissions:
+  contents: write
+  issues: read
+  checks: read
+  pull-requests: read
+
 jobs:
   release:
     runs-on: ubuntu-latest
