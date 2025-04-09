@@ -1,7 +1,5 @@
 package de.qytera.jmeterharimporter;
 
-import org.junit.Before;
-import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
@@ -10,12 +8,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.jmeter.config.Argument;
 import org.apache.jmeter.gui.tree.JMeterTreeNode;
 import org.apache.jmeter.protocol.http.control.HeaderManager;
 import org.apache.jmeter.protocol.http.sampler.HTTPSamplerProxy;
 import org.apache.jmeter.sampler.TestAction;
+import org.junit.Before;
+import org.junit.Test;
 
 // tests GET and DELETE
 public class HARImporterGetTest {
@@ -24,7 +23,8 @@ public class HARImporterGetTest {
 
     @Before
     public void setUp() {
-        HARImporter harImporter = new HARImporter("src/test/resources/get-www.randomnumberapi.com.har");
+        HARImporter harImporter =
+            new HARImporter("src/test/resources/get-www.randomnumberapi.com.har");
         threadGroupNode = harImporter.addNewThreadGroupWithSamplers();
     }
 
@@ -36,13 +36,15 @@ public class HARImporterGetTest {
     @Test
     public void testHARImporter_controller() {
         assertEquals(2, threadGroupNode.getChildCount());
-        assertEquals("TC.001 - www.randomnumberapi.com", ((JMeterTreeNode) threadGroupNode.getChildAt(0)).getName());
-        assertEquals("TC.002 - www.randomnumberapi.com", ((JMeterTreeNode) threadGroupNode.getChildAt(1)).getName());
+        assertEquals("TC.001 - www.randomnumberapi.com",
+            ((JMeterTreeNode) threadGroupNode.getChildAt(0)).getName());
+        assertEquals("TC.002 - www.randomnumberapi.com",
+            ((JMeterTreeNode) threadGroupNode.getChildAt(1)).getName());
     }
 
     @Test
     public void testHARImporter_timer() {
-        String[] timerDelays = { "0", "8293" };
+        String[] timerDelays = {"0", "8293"};
 
         assertEquals(timerDelays.length, threadGroupNode.getChildCount());
 
@@ -61,7 +63,9 @@ public class HARImporterGetTest {
         threadGroupNode = harImporter.addNewThreadGroupWithSamplers(true, false, false);
 
 
-        String[] timerDelays = { "0", "1", "78", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "20" };
+        String[] timerDelays =
+            {"0", "1", "78", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1",
+                "20"};
 
         for (int i = 0; i < timerDelays.length; i++) {
             JMeterTreeNode controller = (JMeterTreeNode) threadGroupNode.getChildAt(i);
@@ -74,10 +78,11 @@ public class HARImporterGetTest {
 
     @Test
     public void testHARImporter_no_timer() {
-        HARImporter harImporter = new HARImporter("src/test/resources/get-www.randomnumberapi.com.har");
+        HARImporter harImporter =
+            new HARImporter("src/test/resources/get-www.randomnumberapi.com.har");
         threadGroupNode = harImporter.addNewThreadGroupWithSamplers(false, false, false);
 
-        String[] timerDelays = { "0", "8293" };
+        String[] timerDelays = {"0", "8293"};
 
         assertEquals(timerDelays.length, threadGroupNode.getChildCount());
 
@@ -125,16 +130,18 @@ public class HARImporterGetTest {
 
     @Test
     public void testHARImporter_header() {
-        JMeterTreeNode header = (JMeterTreeNode) threadGroupNode.getChildAt(1).getChildAt(1).getChildAt(0);
+        JMeterTreeNode header =
+            (JMeterTreeNode) threadGroupNode.getChildAt(1).getChildAt(1).getChildAt(0);
         HeaderManager headerOject = (HeaderManager) header.getUserObject();
         assertEquals(headerOject.getHeaders().size(), 16);
     }
 
     @Test
     public void testHARImporter_no_header() {
-        HARImporter harImporter = new HARImporter("src/test/resources/get-www.randomnumberapi.com.har");
+        HARImporter harImporter =
+            new HARImporter("src/test/resources/get-www.randomnumberapi.com.har");
         threadGroupNode = harImporter.addNewThreadGroupWithSamplers(false, false, false);
-        
+
         boolean isHeaderAvailable = true;
 
         try {
@@ -151,7 +158,8 @@ public class HARImporterGetTest {
         boolean exceptionThrown = false;
 
         try {
-            HARImporter harImporter = new HARImporter("src/test/resources/cookie-no-expiry-date.har");
+            HARImporter harImporter =
+                new HARImporter("src/test/resources/cookie-no-expiry-date.har");
             threadGroupNode = harImporter.addNewThreadGroupWithSamplers(false, false, true);
         } catch (Exception e) {
             e.printStackTrace();

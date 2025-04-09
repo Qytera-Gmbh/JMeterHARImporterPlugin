@@ -1,10 +1,9 @@
 package de.qytera.jmeterharimporter;
 
-import org.apache.jmeter.gui.tree.JMeterTreeNode;
-
-import javax.swing.tree.TreeNode;
 import java.util.Enumeration;
 import java.util.NoSuchElementException;
+import javax.swing.tree.TreeNode;
+import org.apache.jmeter.gui.tree.JMeterTreeNode;
 
 public class NodeUtil {
 
@@ -25,13 +24,14 @@ public class NodeUtil {
         while (children.hasMoreElements()) {
             TreeNode child = children.nextElement();
             if (child instanceof JMeterTreeNode) {
-                Object userObject = ((JMeterTreeNode)child).getUserObject();
+                Object userObject = ((JMeterTreeNode) child).getUserObject();
                 if (childClass.isInstance(userObject)) {
                     return childClass.cast(userObject);
                 }
             }
         }
-        throw new NoSuchElementException(String.format("Node does not contain a child of class %s", childClass.getName()));
+        throw new NoSuchElementException(
+            String.format("Node does not contain a child of class %s", childClass.getName()));
     }
 
 }
