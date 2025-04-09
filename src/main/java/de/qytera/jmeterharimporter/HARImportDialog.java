@@ -5,12 +5,10 @@ import de.sstoehr.harreader.HarReaderException;
 import de.sstoehr.harreader.model.Har;
 import de.sstoehr.harreader.model.HarEntry;
 import de.sstoehr.harreader.model.HarRequest;
-import org.apache.jmeter.gui.plugin.MenuCreator;
-
-import javax.swing.*;
-import javax.swing.border.TitledBorder;
-import javax.swing.filechooser.FileFilter;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -18,6 +16,22 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JDialog;
+import javax.swing.JFileChooser;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextField;
+import javax.swing.MenuElement;
+import javax.swing.WindowConstants;
+import javax.swing.border.TitledBorder;
+import javax.swing.filechooser.FileFilter;
+import org.apache.jmeter.gui.plugin.MenuCreator;
 
 /**
  * This class implements the MenuCreator and ActionListener interfaces to create a menu item in JMeter's Tools menu
@@ -73,21 +87,27 @@ public class HARImportDialog implements MenuCreator, ActionListener {
         harFilePanel.setBorder(harFileBorder);
         this.harInputField = new JTextField();
         this.harInputField.setToolTipText("The chosen HAR file");
-        this.harInputField.setMinimumSize(new Dimension(MINIMUM_DIALOG_WIDTH * 4 / 5, MINIMUM_ELEMENT_HEIGHT));
-        this.harInputField.setPreferredSize(new Dimension(MINIMUM_DIALOG_WIDTH * 4 / 5, MINIMUM_ELEMENT_HEIGHT));
+        this.harInputField.setMinimumSize(
+            new Dimension(MINIMUM_DIALOG_WIDTH * 4 / 5, MINIMUM_ELEMENT_HEIGHT));
+        this.harInputField.setPreferredSize(
+            new Dimension(MINIMUM_DIALOG_WIDTH * 4 / 5, MINIMUM_ELEMENT_HEIGHT));
         harFilePanel.add(this.harInputField, BorderLayout.CENTER);
         JButton chooseHarFileButton = new JButton();
         chooseHarFileButton.setContentAreaFilled(true);
-        chooseHarFileButton.setMinimumSize(new Dimension(MINIMUM_DIALOG_WIDTH / 5, MINIMUM_ELEMENT_HEIGHT));
-        chooseHarFileButton.setPreferredSize(new Dimension(MINIMUM_DIALOG_WIDTH / 5, MINIMUM_ELEMENT_HEIGHT));
+        chooseHarFileButton.setMinimumSize(
+            new Dimension(MINIMUM_DIALOG_WIDTH / 5, MINIMUM_ELEMENT_HEIGHT));
+        chooseHarFileButton.setPreferredSize(
+            new Dimension(MINIMUM_DIALOG_WIDTH / 5, MINIMUM_ELEMENT_HEIGHT));
         chooseHarFileButton.setText("Choose");
         chooseHarFileButton.setToolTipText("Choose HAR file to import");
         harFilePanel.add(chooseHarFileButton, BorderLayout.EAST);
 
         // Ignored hosts area.
         this.ignoredHostsPanel = new JPanel();
-        this.ignoredHostsPanel.setLayout(new BoxLayout(this.ignoredHostsPanel, BoxLayout.PAGE_AXIS));
-        TitledBorder ignoredHostsBorder = BorderFactory.createTitledBorder("Select hosts to exclude");
+        this.ignoredHostsPanel.setLayout(
+            new BoxLayout(this.ignoredHostsPanel, BoxLayout.PAGE_AXIS));
+        TitledBorder ignoredHostsBorder =
+            BorderFactory.createTitledBorder("Select hosts to exclude");
         ignoredHostsBorder.setTitleJustification(TitledBorder.DEFAULT_JUSTIFICATION);
         ignoredHostsBorder.setTitlePosition(TitledBorder.DEFAULT_POSITION);
         this.ignoredHostsPanel.setBorder(ignoredHostsBorder);
@@ -107,8 +127,10 @@ public class HARImportDialog implements MenuCreator, ActionListener {
         optionsPanelBorder.setTitlePosition(TitledBorder.DEFAULT_POSITION);
         optionsPanel.setBorder(optionsPanelBorder);
         optionsPanel.setLayout(new BoxLayout(optionsPanel, BoxLayout.Y_AXIS));
-        optionsPanel.setMinimumSize(new Dimension(MINIMUM_DIALOG_WIDTH, MINIMUM_ELEMENT_HEIGHT * 3));
-        optionsPanel.setPreferredSize(new Dimension(MINIMUM_DIALOG_WIDTH, MINIMUM_ELEMENT_HEIGHT * 3));
+        optionsPanel.setMinimumSize(
+            new Dimension(MINIMUM_DIALOG_WIDTH, MINIMUM_ELEMENT_HEIGHT * 3));
+        optionsPanel.setPreferredSize(
+            new Dimension(MINIMUM_DIALOG_WIDTH, MINIMUM_ELEMENT_HEIGHT * 3));
 
         addTimerCheckbox = new JCheckBox("Add Recorded Waiting Time");
         optionsPanel.add(addTimerCheckbox);
@@ -129,8 +151,10 @@ public class HARImportDialog implements MenuCreator, ActionListener {
         // Dialog actions area.
         JPanel dialogActionsPanel = new JPanel();
         dialogActionsPanel.setLayout(new GridBagLayout());
-        dialogActionsPanel.setMinimumSize(new Dimension(MINIMUM_DIALOG_WIDTH, MINIMUM_ELEMENT_HEIGHT));
-        dialogActionsPanel.setPreferredSize(new Dimension(MINIMUM_DIALOG_WIDTH, MINIMUM_ELEMENT_HEIGHT));
+        dialogActionsPanel.setMinimumSize(
+            new Dimension(MINIMUM_DIALOG_WIDTH, MINIMUM_ELEMENT_HEIGHT));
+        dialogActionsPanel.setPreferredSize(
+            new Dimension(MINIMUM_DIALOG_WIDTH, MINIMUM_ELEMENT_HEIGHT));
         gbc.gridx = 0;
         gbc.gridy = 3;
         gbc.weightx = 0.0;
@@ -138,8 +162,10 @@ public class HARImportDialog implements MenuCreator, ActionListener {
         gbc.fill = GridBagConstraints.BOTH;
         importForm.add(dialogActionsPanel, gbc);
         JButton cancelButton = new JButton();
-        cancelButton.setMinimumSize(new Dimension(MINIMUM_DIALOG_WIDTH / 2, MINIMUM_ELEMENT_HEIGHT));
-        cancelButton.setPreferredSize(new Dimension(MINIMUM_DIALOG_WIDTH / 2, MINIMUM_ELEMENT_HEIGHT));
+        cancelButton.setMinimumSize(
+            new Dimension(MINIMUM_DIALOG_WIDTH / 2, MINIMUM_ELEMENT_HEIGHT));
+        cancelButton.setPreferredSize(
+            new Dimension(MINIMUM_DIALOG_WIDTH / 2, MINIMUM_ELEMENT_HEIGHT));
         cancelButton.setText("Cancel");
         cancelButton.setToolTipText("Cancel the import");
         gbc.gridx = 0;
@@ -149,8 +175,10 @@ public class HARImportDialog implements MenuCreator, ActionListener {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         dialogActionsPanel.add(cancelButton, gbc);
         this.importButton = new JButton();
-        this.importButton.setMinimumSize(new Dimension(MINIMUM_DIALOG_WIDTH / 2, MINIMUM_ELEMENT_HEIGHT));
-        this.importButton.setPreferredSize(new Dimension(MINIMUM_DIALOG_WIDTH / 2, MINIMUM_ELEMENT_HEIGHT));
+        this.importButton.setMinimumSize(
+            new Dimension(MINIMUM_DIALOG_WIDTH / 2, MINIMUM_ELEMENT_HEIGHT));
+        this.importButton.setPreferredSize(
+            new Dimension(MINIMUM_DIALOG_WIDTH / 2, MINIMUM_ELEMENT_HEIGHT));
         this.importButton.setText("Import");
         this.importButton.setToolTipText("Import the configured HAR file to JMeter");
         this.importButton.setEnabled(false);
@@ -165,8 +193,10 @@ public class HARImportDialog implements MenuCreator, ActionListener {
         this.importDialog = new JDialog();
         this.importDialog.setTitle("Import HAR File");
         this.importDialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-        this.importDialog.setMinimumSize(new Dimension(MINIMUM_DIALOG_WIDTH, MINIMUM_DIALOG_HEIGHT));
-        this.importDialog.setPreferredSize(new Dimension(MINIMUM_DIALOG_WIDTH, MINIMUM_DIALOG_HEIGHT));
+        this.importDialog.setMinimumSize(
+            new Dimension(MINIMUM_DIALOG_WIDTH, MINIMUM_DIALOG_HEIGHT));
+        this.importDialog.setPreferredSize(
+            new Dimension(MINIMUM_DIALOG_WIDTH, MINIMUM_DIALOG_HEIGHT));
         this.importDialog.add(importForm);
 
         chooseHarFileButton.addActionListener(e -> {
@@ -190,26 +220,26 @@ public class HARImportDialog implements MenuCreator, ActionListener {
                 try {
                     clearPanel();
                     this.har = new HarReader().readFromFile(new File(harInputField.getText()));
-                    this.har.getLog().getEntries().stream()
-                            .map(HarEntry::getRequest)
-                            .map(HarRequest::getUrl)
-                            .filter(url -> !url.startsWith("data:"))
-                            .map(URI::create)
-                            .map(URI::getHost)
-                            .filter(Objects::nonNull)
-                            .distinct()
-                            .sorted()
-                            .forEach(host -> {
-                                JCheckBox hostCheckbox = new JCheckBox();
-                                hostCheckbox.setPreferredSize(
-                                        new Dimension(
-                                                ignoredHostsPanel.getPreferredSize().width,
-                                                MINIMUM_ELEMENT_HEIGHT)
-                                );
-                                hostCheckbox.setText(host);
-                                hostCheckboxes.put(host, hostCheckbox);
-                                ignoredHostsPanel.add(hostCheckbox);
-                            });
+                    this.har.log().entries().stream()
+                        .map(HarEntry::request)
+                        .map(HarRequest::url)
+                        .filter(url -> !url.startsWith("data:"))
+                        .map(URI::create)
+                        .map(URI::getHost)
+                        .filter(Objects::nonNull)
+                        .distinct()
+                        .sorted()
+                        .forEach(host -> {
+                            JCheckBox hostCheckbox = new JCheckBox();
+                            hostCheckbox.setPreferredSize(
+                                new Dimension(
+                                    ignoredHostsPanel.getPreferredSize().width,
+                                    MINIMUM_ELEMENT_HEIGHT)
+                            );
+                            hostCheckbox.setText(host);
+                            hostCheckboxes.put(host, hostCheckbox);
+                            ignoredHostsPanel.add(hostCheckbox);
+                        });
                     importButton.setEnabled(true);
                     importDialog.revalidate();
                     importDialog.repaint();
@@ -228,7 +258,8 @@ public class HARImportDialog implements MenuCreator, ActionListener {
                     importer.ignoreHost(host);
                 }
             });
-        importer.addNewThreadGroupWithSamplers(addTimerCheckbox.isSelected(), addHeaderCheckbox.isSelected(), addCookiesCheckbox.isSelected());
+            importer.addNewThreadGroupWithSamplers(addTimerCheckbox.isSelected(),
+                addHeaderCheckbox.isSelected(), addCookiesCheckbox.isSelected());
             importDialog.dispose();
         });
     }
@@ -245,10 +276,10 @@ public class HARImportDialog implements MenuCreator, ActionListener {
         if (location == MENU_LOCATION.TOOLS) {
             JMenuItem importItem = new JMenuItem("Import HAR File");
             importItem.addActionListener(this);
-            return new JMenuItem[]{importItem};
+            return new JMenuItem[] {importItem};
         }
 
-        return new JMenuItem[]{};
+        return new JMenuItem[] {};
     }
 
     @Override
