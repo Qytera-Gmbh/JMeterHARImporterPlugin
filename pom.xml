@@ -49,7 +49,7 @@
         <dependency>
             <groupId>de.sstoehr</groupId>
             <artifactId>har-reader</artifactId>
-            <version>3.0.1</version>
+            <version>3.1.0</version>
         </dependency>
     </dependencies>
 
