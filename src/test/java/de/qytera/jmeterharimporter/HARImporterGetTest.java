@@ -13,15 +13,15 @@ import org.apache.jmeter.gui.tree.JMeterTreeNode;
 import org.apache.jmeter.protocol.http.control.HeaderManager;
 import org.apache.jmeter.protocol.http.sampler.HTTPSamplerProxy;
 import org.apache.jmeter.sampler.TestAction;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 // tests GET and DELETE
 public class HARImporterGetTest {
 
     JMeterTreeNode threadGroupNode = null;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         HARImporter harImporter =
             new HARImporter("src/test/resources/get-www.randomnumberapi.com.har");
