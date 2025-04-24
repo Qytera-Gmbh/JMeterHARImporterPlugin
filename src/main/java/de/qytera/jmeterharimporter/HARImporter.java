@@ -1,14 +1,11 @@
 package de.qytera.jmeterharimporter;
 
-import de.sstoehr.harreader.HarReader;
-import de.sstoehr.harreader.HarReaderException;
 import de.sstoehr.harreader.model.Har;
 import de.sstoehr.harreader.model.HarCookie;
 import de.sstoehr.harreader.model.HarEntry;
 import de.sstoehr.harreader.model.HarHeader;
 import de.sstoehr.harreader.model.HarQueryParam;
 import de.sstoehr.harreader.model.HarRequest;
-import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
@@ -22,7 +19,6 @@ import org.apache.jmeter.control.TransactionController;
 import org.apache.jmeter.control.gui.LoopControlPanel;
 import org.apache.jmeter.exceptions.IllegalUserActionException;
 import org.apache.jmeter.gui.GuiPackage;
-import org.apache.jmeter.gui.tree.JMeterTreeModel;
 import org.apache.jmeter.gui.tree.JMeterTreeNode;
 import org.apache.jmeter.protocol.http.control.Cookie;
 import org.apache.jmeter.protocol.http.control.CookieManager;
@@ -38,18 +34,23 @@ import org.apache.jmeter.testelement.AbstractTestElement;
 import org.apache.jmeter.testelement.TestElement;
 import org.apache.jmeter.threads.ThreadGroup;
 import org.apache.jmeter.threads.gui.ThreadGroupGui;
-import org.apache.jmeter.timers.ConstantTimer;
-import org.apache.jmeter.timers.gui.ConstantTimerGui;
 
 public class HARImporter {
-    /**
-     *
-     */
     private static final String THINK_TIME = "Think Time";
     private static final String HAR_IMPORTED = "HAR Imported";
     private final GuiPackage guiPackage;
     private final Set<String> hostsIgnored = new HashSet<>();
-    private Har har;
+    private final Har har;
+
+    /**
+     * Constructs a new importer based on the provided file path.
+     *
+     * @param filePath the path to the HAR file
+     */
+    public HARImporter(String filePath) {
+        this.har = HarFileReader.readHarFromFile(filePath);
+        this.guiPackage = GuiInitializer.initializeGuiPackage();
+    }
 
     /**
      * Constructs a new importer based on the provided HAR data.
@@ -58,48 +59,18 @@ public class HARImporter {
      */
     public HARImporter(Har har) {
         this.har = har;
-        if (GuiPackage.getInstance() == null) {
-            GuiPackage.initInstance(null, new JMeterTreeModel());
-        }
-        this.guiPackage = GuiPackage.getInstance();
-    }
-
-    /**
-     * Constructor for the HARImporter class
-     *
-     * @param filePath
-     */
-    public HARImporter(String filePath) {
-        try {
-            this.har = new HarReader().readFromFile(new File(filePath));
-        } catch (HarReaderException e) {
-            e.printStackTrace();
-        }
-
-        if (GuiPackage.getInstance() == null) {
-            GuiPackage.initInstance(null, new JMeterTreeModel());
-        }
-
-        this.guiPackage = GuiPackage.getInstance();
+        this.guiPackage = GuiInitializer.initializeGuiPackage();
     }
 
     /**
      * Adds a host to the set of ignored hosts. If a HAR entry contains the host in its request URL, the entry will be
      * skipped during conversion.
      *
-     * <pre>
-     * {@code
-     * // GET https://www.example.org/xyz?a=1&b=2
-     * importer.ignoreHost("www.example.org");
-     * }
-     * </pre>
-     *
      * @param host the host to ignore
      */
     public void ignoreHost(String host) {
         this.hostsIgnored.add(host);
     }
-
 
     /**
      * Adds a new Thread Group to the JMeter tree and adds a HTTP Sampler for each
@@ -297,17 +268,6 @@ public class HARImporter {
         testAction.setProperty(TestElement.GUI_CLASS, TestActionGui.class.getName());
 
         return testAction;
-    }
-
-    @SuppressWarnings("unused")
-    private ConstantTimer createConstantTimer(long time) {
-        ConstantTimer constantTimer = new ConstantTimer();
-        constantTimer.setName(THINK_TIME);
-        constantTimer.setDelay(String.valueOf(time));
-        constantTimer.setProperty(TestElement.TEST_CLASS, ConstantTimer.class.getName());
-        constantTimer.setProperty(TestElement.GUI_CLASS, ConstantTimerGui.class.getName());
-
-        return constantTimer;
     }
 
     private LoopController createLoopControler() {

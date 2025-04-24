@@ -5,15 +5,15 @@ import static org.junit.Assert.assertTrue;
 
 import org.apache.jmeter.gui.tree.JMeterTreeNode;
 import org.apache.jmeter.protocol.http.sampler.HTTPSamplerProxy;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
 
 // tests POST, PUT, and PATCH
 public class HARImporterPostTest {
 
     JMeterTreeNode threadGroupNode = null;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         HARImporter harImporter = new HARImporter("src/test/resources/post-example.har");
         threadGroupNode = harImporter.addNewThreadGroupWithSamplers();
