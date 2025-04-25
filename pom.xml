@@ -9,6 +9,8 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
         <jmeter.version>5.6.3</jmeter.version>
         <jmeter.path>C:/scoop/apps/jmeter/current</jmeter.path>
     </properties>
@@ -106,19 +108,13 @@
                             <!-- Includes all project dependencies -->
                             <artifactSet>
                                 <includes>
-                                    <!-- This will include all your project dependencies automatically -->
+                                    <include>de.sstoehr:har-reader</include>
+                                    <include>com.fasterxml.jackson.core:jackson-core</include>
+                                    <include>com.fasterxml.jackson.core:jackson-databind</include>
+                                    <include>com.fasterxml.jackson.core:jackson-annotations</include>
+                                    <include>com.fasterxml.jackson.datatype:jackson-datatype-jsr310</include>
                                 </includes>
                             </artifactSet>
-                            <filters>
-                                <filter>
-                                    <artifact>*:*</artifact>
-                                    <excludes>
-                                        <exclude>META-INF/*.SF</exclude>
-                                        <exclude>META-INF/*.DSA</exclude>
-                                        <exclude>META-INF/*.RSA</exclude>
-                                    </excludes>
-                                </filter>
-                            </filters>
                         </configuration>
                     </execution>
                 </executions>
