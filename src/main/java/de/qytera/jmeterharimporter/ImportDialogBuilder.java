@@ -5,6 +5,7 @@ import de.sstoehr.harreader.model.Har;
 import de.sstoehr.harreader.model.HarEntry;
 import de.sstoehr.harreader.model.HarRequest;
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -20,10 +21,14 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
+import javax.swing.SwingWorker;
 import javax.swing.WindowConstants;
 
 /**
@@ -111,32 +116,82 @@ public class ImportDialogBuilder {
         return null;
     }
 
-    // Simplify the file loading process
     public void loadHarFile(File file) {
-        try {
-            clearHostPanel();
-            har = new de.sstoehr.harreader.HarReader().readFromFile(file);
+        JPanel loadingPanel = createLoadingPanel();
+        dialog.getContentPane().add(loadingPanel, BorderLayout.CENTER);
+        dialog.revalidate();
+        dialog.repaint();
 
-            har.log().entries().stream()
-                .map(HarEntry::request)
-                .map(HarRequest::url)
-                .filter(url -> !url.startsWith("data:"))
-                .map(URI::create)
-                .map(URI::getHost)
-                .filter(Objects::nonNull)
-                .distinct()
-                .sorted()
-                .forEach(this::addHostCheckbox);
+        new SwingWorker<Void, Void>() {
+            @Override
+            protected Void doInBackground() throws Exception {
+                try {
+                    clearHostPanel();
+                    har = new de.sstoehr.harreader.HarReader().readFromFile(file);
 
-            importButton.setEnabled(true);
-            dialog.revalidate();
-            dialog.repaint();
-        } catch (HarReaderException e) {
-            LOGGER.severe("Exception occured when loading har file.");
-            importButton.setEnabled(false);
-            JOptionPane.showMessageDialog(dialog, "Failed to load HAR file.", "Error",
-                JOptionPane.ERROR_MESSAGE);
-        }
+                    har.log().entries().stream()
+                        .map(HarEntry::request)
+                        .map(HarRequest::url)
+                        .filter(url -> !url.startsWith("data:"))
+                        .map(URI::create)
+                        .map(URI::getHost)
+                        .filter(Objects::nonNull)
+                        .distinct()
+                        .sorted()
+                        .forEach(ImportDialogBuilder.this::addHostCheckbox);
+
+                    return null;
+                } catch (HarReaderException e) {
+                    LOGGER.severe("Exception occurred when loading HAR file.");
+                    importButton.setEnabled(false);
+                    JOptionPane.showMessageDialog(dialog, "Failed to load HAR file.", "Error", JOptionPane.ERROR_MESSAGE);
+                    return null;
+                }
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    dialog.getContentPane().remove(loadingPanel);
+                    dialog.revalidate();
+                    dialog.repaint();
+
+                    importButton.setEnabled(true);
+                } catch (Exception e) {
+                    LOGGER.severe("Exception occurred after loading HAR file.");
+                }
+            }
+        }.execute();
+    }
+
+    /**
+     * Creates a loading panel with a spinner and a "Loading..." message.
+     *
+     * @return a JPanel containing the loading spinner and message
+     */
+    private JPanel createLoadingPanel() {
+        JPanel loadingPanel = new JPanel();
+        loadingPanel.setLayout(new BorderLayout());
+        loadingPanel.setOpaque(true);
+        loadingPanel.setBackground(new Color(0, 0, 0, 128));
+
+        JProgressBar progressBar = new JProgressBar();
+        progressBar.setIndeterminate(true);
+        progressBar.setPreferredSize(new Dimension(DIALOG_WIDTH - 40, 30));
+
+        JLabel loadingLabel = new JLabel("Loading...");
+        loadingLabel.setForeground(Color.WHITE);
+        loadingLabel.setHorizontalAlignment(SwingConstants.CENTER);
+
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.add(progressBar);
+        panel.add(loadingLabel);
+
+        loadingPanel.add(panel, BorderLayout.CENTER);
+        loadingPanel.setPreferredSize(new Dimension(DIALOG_WIDTH, DIALOG_HEIGHT));
+
+        return loadingPanel;
     }
 
     private void addHostCheckbox(String host) {
@@ -203,18 +258,49 @@ public class ImportDialogBuilder {
     }
 
     private void performImport() {
-        HARImporter importer = new HARImporter(har);
-        hostCheckboxes.forEach((host, checkbox) -> {
-            if (checkbox.isSelected()) {
-                importer.ignoreHost(host);
+        JPanel loadingPanel = createLoadingPanel();
+        dialog.getContentPane().add(loadingPanel, BorderLayout.CENTER);
+        dialog.revalidate();
+        dialog.repaint();
+
+        new SwingWorker<Void, Void>() {
+            @Override
+            protected Void doInBackground() throws Exception {
+                try {
+                    HARImporter importer = new HARImporter(har);
+
+                    hostCheckboxes.forEach((host, checkbox) -> {
+                        if (checkbox.isSelected()) {
+                            importer.ignoreHost(host);
+                        }
+                    });
+
+                    importer.addNewThreadGroupWithSamplers(
+                        addTimerCheckbox.isSelected(),
+                        addHeaderCheckbox.isSelected(),
+                        addCookiesCheckbox.isSelected()
+                    );
+
+                } catch (Exception e) {
+                    LOGGER.severe("Error during HAR import process: " + e.getMessage());
+                    return null;
+                }
+                return null;
             }
-        });
-        importer.addNewThreadGroupWithSamplers(
-            addTimerCheckbox.isSelected(),
-            addHeaderCheckbox.isSelected(),
-            addCookiesCheckbox.isSelected()
-        );
-        dialog.dispose();
+
+            @Override
+            protected void done() {
+                try {
+                    dialog.getContentPane().remove(loadingPanel);
+                    dialog.revalidate();
+                    dialog.repaint();
+
+                    dialog.dispose();
+                } catch (Exception e) {
+                    LOGGER.severe("Exception occurred after completing import.");
+                }
+            }
+        }.execute();
     }
 
     private void clearHostPanel() {
