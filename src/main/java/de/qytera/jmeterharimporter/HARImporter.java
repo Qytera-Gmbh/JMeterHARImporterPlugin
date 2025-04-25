@@ -83,104 +83,96 @@ public class HARImporter {
     }
 
     /**
-     * Adds a new Thread Group to the JMeter tree and adds a HTTP Sampler for each
-     * HAR entry
+     * Adds a new Thread Group to the JMeter test plan and populates it with HTTP samplers
+     * generated from the HAR file's entries.
      *
-     * @param shouldAddThinkTime whether to add think time between the requests
-     * @param shouldAddHeader    whether to add the recorded headers to the requests
-     * @param shouldAddCookies   whether to add the recorded cookies to the requests
-     * @return the root node of the JMeter tree
+     * @param addThinkTime whether to include timers to simulate "think time"
+     * @param addHeader    whether to include request headers
+     * @param addCookies   whether to include cookies
+     * @return the JMeterTreeNode representing the created Thread Group, or null on error
      */
-    public JMeterTreeNode addNewThreadGroupWithSamplers(Boolean shouldAddThinkTime,
-                                                        Boolean shouldAddHeader,
-                                                        Boolean shouldAddCookies) {
+    public JMeterTreeNode addNewThreadGroupWithSamplers(Boolean addThinkTime, Boolean addHeader,
+                                                        Boolean addCookies) {
         try {
-            // Get the root node of the JMeter tree
-            JMeterTreeNode root = (JMeterTreeNode) this.guiPackage.getTreeModel().getRoot();
-
-            // Create a Thread Group to hold the requests
+            JMeterTreeNode root = (JMeterTreeNode) guiPackage.getTreeModel().getRoot();
             JMeterTreeNode threadGroupNode = addComponent(createThreadGroup(), root);
 
-            Map<Long, JMeterTreeNode> transactionControllers = new HashMap<>();
-            Map<Long, Boolean> transactionControllerHasTimer = new HashMap<>();
+            Map<Long, JMeterTreeNode> transactionNodes = new HashMap<>();
+            Set<Long> timersAdded = new HashSet<>();
 
-            int i = 1;
             long lastTimestamp = -1;
-            for (HarEntry harEntry : this.har.log().entries()) {
-                // calculate think time
+            int index = 1;
+
+            for (HarEntry entry : har.log().entries()) {
+                long entryTime = entry.startedDateTime().toInstant().toEpochMilli();
+
                 if (lastTimestamp == -1) {
-                    lastTimestamp = harEntry.startedDateTime().toInstant()
-                        .toEpochMilli(); // first entry should become 0
+                    lastTimestamp = entryTime;
                 }
 
-                long currentEntryStartTime = harEntry.startedDateTime().toInstant().toEpochMilli();
-                long timeDifference = currentEntryStartTime - lastTimestamp;
+                HarRequest request = entry.request();
+                URI uri = URI.create(request.url());
 
-                if (transactionControllerHasTimer.get(currentEntryStartTime) == null) {
-                    lastTimestamp = currentEntryStartTime;
-                }
-
-                HarRequest harRequest = harEntry.request();
-                URI uri = URI.create(harRequest.url());
-                if (this.hostsIgnored.contains(uri.getHost())) {
+                if (hostsIgnored.contains(uri.getHost())) {
                     continue;
                 }
-                // add a transaction controller for each entry to group the samplers
-                if (transactionControllers.get(currentEntryStartTime) == null) {
-                    TransactionController transactionController = createTransactionController(
-                        String.format("TC.%03d - %s", i++, uri.getHost()));
-                    JMeterTreeNode transactionControllerNodeSub =
-                        addComponent(transactionController, threadGroupNode);
-                    transactionControllers.put(currentEntryStartTime, transactionControllerNodeSub);
+
+                JMeterTreeNode transactionNode = transactionNodes.get(entryTime);
+                if (transactionNode == null) {
+                    TransactionController tc = createTransactionController(
+                        String.format("TC.%03d - %s", index++, uri.getHost()));
+                    transactionNode = addComponent(tc, threadGroupNode);
+                    transactionNodes.put(entryTime, transactionNode);
                 }
 
-                JMeterTreeNode transactionControllerNodeSub =
-                    transactionControllers.get(currentEntryStartTime);
-
-                // add a constant timer to simulate the think time
-                if (shouldAddThinkTime) {
-                    if (transactionControllerHasTimer.get(currentEntryStartTime) == null) {
-                        transactionControllerHasTimer.put(currentEntryStartTime, true);
-                        addComponent(createFlowControlAction(timeDifference),
-                            transactionControllerNodeSub);
-                    }
+                if (addThinkTime && timersAdded.add(entryTime)) {
+                    long thinkTime = entryTime - lastTimestamp;
+                    addComponent(createFlowControlAction(thinkTime), transactionNode);
+                    lastTimestamp = entryTime;
                 }
 
-                // add the http sampler
-                JMeterTreeNode httpSamplerNode = addComponent(createHttpSampler(harRequest),
-                    transactionControllerNodeSub);
-
-                // add the header manager
-                if (shouldAddHeader) {
-                    addComponent(createHeaderManager(harRequest), httpSamplerNode);
-                }
-
-                // add the cookie manager
-                if (shouldAddCookies) {
-                    addComponent(createCookieManager(harRequest), httpSamplerNode);
-                }
-
-                // add body
-                if (harRequest.postData() != null && harRequest.postData().text() != null) {
-                    HTTPSamplerProxy httpSampler =
-                        (HTTPSamplerProxy) httpSamplerNode.getUserObject();
-                    httpSampler.setPostBodyRaw(true);
-                    httpSampler.addNonEncodedArgument("", harRequest.postData().text(), "");
-                }
+                addSamplerWithExtras(request, transactionNode, addHeader, addCookies);
             }
 
-            // Refresh the JMeter GUI
-            if (this.guiPackage.getMainFrame() != null) {
-                this.guiPackage.getMainFrame().repaint();
+            if (guiPackage.getMainFrame() != null) {
+                guiPackage.getMainFrame().repaint();
             }
 
             return threadGroupNode;
-        } catch (IllegalUserActionException | MalformedURLException e) {
+        } catch (Exception e) {
             e.printStackTrace();
+            return null;
+        }
+    }
+
+
+    private void addSamplerWithExtras(HarRequest request, JMeterTreeNode parent, boolean addHeaders,
+                                      boolean addCookies)
+        throws MalformedURLException, IllegalUserActionException {
+
+        JMeterTreeNode samplerNode = addComponent(createHttpSampler(request), parent);
+
+        if (addHeaders) {
+            HeaderManager headers = createHeaderManager(request);
+            if (headers != null) {
+                addComponent(headers, samplerNode);
+            }
         }
 
-        return null;
+        if (addCookies) {
+            CookieManager cookies = createCookieManager(request);
+            if (cookies != null) {
+                addComponent(cookies, samplerNode);
+            }
+        }
+
+        if (request.postData() != null && request.postData().text() != null) {
+            HTTPSamplerProxy sampler = (HTTPSamplerProxy) samplerNode.getUserObject();
+            sampler.setPostBodyRaw(true);
+            sampler.addNonEncodedArgument("", request.postData().text(), "");
+        }
     }
+
 
     private JMeterTreeNode addComponent(AbstractTestElement component, JMeterTreeNode node)
         throws IllegalUserActionException {
@@ -192,38 +184,51 @@ public class HARImporter {
     }
 
     private CookieManager createCookieManager(HarRequest harRequest) {
-        CookieManager cookieManager = null;
-        if (!harRequest.cookies().isEmpty()) {
-            cookieManager = new CookieManager();
-            cookieManager.setName("browser-cookies");
-            cookieManager.setProperty(TestElement.TEST_CLASS, CookieManager.class.getName());
-            cookieManager.setProperty(TestElement.GUI_CLASS, CookiePanel.class.getName());
-            for (HarCookie cookie : harRequest.cookies()) {
-                long expiration = Long.MAX_VALUE;
-                if (cookie.expires() != null) {
-                    expiration =
-                        cookie.expires().toInstant().toEpochMilli() - (new Date()).getTime();
-                }
-
-                boolean isSecure = cookie.secure() != null ? cookie.secure() : false;
-                String path = cookie.path() != null ? cookie.path() : "";
-                String domain = cookie.domain() != null ? cookie.domain() : "";
-
-                cookieManager.add(new Cookie(cookie.name(), cookie.value(), domain,
-                    path, isSecure, expiration, path.length() > 0,
-                    domain.length() > 0));
-            }
-
-            cookieManager.setClearEachIteration(true);
+        if (harRequest.cookies().isEmpty()) {
+            return null;
         }
 
+        CookieManager cookieManager = new CookieManager();
+        cookieManager.setName("browser-cookies");
+        cookieManager.setProperty(TestElement.TEST_CLASS, CookieManager.class.getName());
+        cookieManager.setProperty(TestElement.GUI_CLASS, CookiePanel.class.getName());
+
+        for (HarCookie harCookie : harRequest.cookies()) {
+            cookieManager.add(convertHarCookie(harCookie));
+        }
+
+        cookieManager.setClearEachIteration(true);
         return cookieManager;
+    }
+
+    private Cookie convertHarCookie(HarCookie harCookie) {
+        long expiration = harCookie.expires() != null
+            ? harCookie.expires().toInstant().toEpochMilli() - new Date().getTime()
+            : Long.MAX_VALUE;
+
+        boolean isSecure = Boolean.TRUE.equals(harCookie.secure());
+        String path = defaultString(harCookie.path());
+        String domain = defaultString(harCookie.domain());
+
+        return new Cookie(
+            harCookie.name(),
+            harCookie.value(),
+            domain,
+            path,
+            isSecure,
+            expiration,
+            !path.isEmpty(),
+            !domain.isEmpty()
+        );
+    }
+
+    private String defaultString(String value) {
+        return value != null ? value : "";
     }
 
     private HeaderManager createHeaderManager(HarRequest harRequest) {
         HeaderManager headerManager = null;
         if (!harRequest.headers().isEmpty()) {
-            // Create Header Manager
             headerManager = new HeaderManager();
             headerManager.setName("browser-headers");
             headerManager.setProperty(TestElement.TEST_CLASS, HeaderManager.class.getName());

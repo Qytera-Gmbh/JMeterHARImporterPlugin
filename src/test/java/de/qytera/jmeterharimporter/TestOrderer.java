@@ -1,12 +1,9 @@
 package de.qytera.jmeterharimporter;
 
-import org.junit.jupiter.api.ClassOrderer;
-import org.junit.jupiter.api.ClassOrdererContext;
-import org.junit.jupiter.api.TestClassOrder;
-import org.junit.jupiter.api.Test;
-
 import java.util.Collections;
 import java.util.Comparator;
+import org.junit.jupiter.api.ClassOrderer;
+import org.junit.jupiter.api.ClassOrdererContext;
 
 // Define the custom test orderer for alphanumeric sorting
 public class TestOrderer implements ClassOrderer {

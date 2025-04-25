@@ -2,3 +2,4 @@
 /jmeter.log
 /dependency-reduced-pom.xml
 /tmp/*
+/.idea/*

@@ -4,8 +4,8 @@ import static org.junit.Assert.assertEquals;
 
 import javax.swing.tree.TreeNode;
 import org.apache.jmeter.protocol.http.sampler.HTTPSamplerProxy;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 // tests ignored hosts
 public class HARImporterIgnoreHostTest {

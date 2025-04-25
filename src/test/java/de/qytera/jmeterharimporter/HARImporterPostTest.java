@@ -5,8 +5,8 @@ import static org.junit.Assert.assertTrue;
 
 import org.apache.jmeter.gui.tree.JMeterTreeNode;
 import org.apache.jmeter.protocol.http.sampler.HTTPSamplerProxy;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 // tests POST, PUT, and PATCH
 public class HARImporterPostTest {
