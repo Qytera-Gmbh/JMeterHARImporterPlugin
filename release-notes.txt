@@ -2,7 +2,7 @@ Release Notes
 
 Product Name: JMeter HAR Importer
 Release Number: Version 1.1.0
-Release Date: [2025-04-23]
+Release Date: [2025-04-25]
 
 Overview:
 The JMeter HAR Importer plugin is designed to facilitate the import of HTTP Archive (HAR) files into JMeter.
