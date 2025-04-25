@@ -1,5 +1,6 @@
 package de.qytera.jmeterharimporter;
 
+import java.io.File;
 import javax.swing.JDialog;
 import javax.swing.SwingUtilities;
 import org.assertj.swing.core.BasicRobot;
@@ -10,6 +11,7 @@ import org.assertj.swing.edt.FailOnThreadViolationRepaintManager;
 import org.assertj.swing.finder.WindowFinder;
 import org.assertj.swing.fixture.DialogFixture;
 import org.assertj.swing.fixture.JButtonFixture;
+import org.assertj.swing.fixture.JFileChooserFixture;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -24,6 +26,7 @@ public class ImportDialogBuilderTest {
 
     private static Robot robot;
     private DialogFixture dialogFixture;
+    private ImportDialogBuilder importDialogBuilder;  // Add this line to hold the instance
 
     @BeforeAll
     static void setUpOnce() {
@@ -38,30 +41,56 @@ public class ImportDialogBuilderTest {
 
     @BeforeEach
     void setUp() {
-        SwingUtilities.invokeLater(() -> {
-            HARImportDialogBuilder builder = new HARImportDialogBuilder();
-            builder.showDialog();
-        });
+        try {
+            SwingUtilities.invokeAndWait(() -> {
+                importDialogBuilder = new ImportDialogBuilder();  // Store the builder instance here
+                importDialogBuilder.showDialog();
+            });
 
-        dialogFixture = WindowFinder.findDialog(new GenericTypeMatcher<>(JDialog.class) {
-            @Override
-            protected boolean isMatching(JDialog dialog) {
-                return "Import HAR File".equals(dialog.getTitle()) && dialog.isShowing();
+            dialogFixture = WindowFinder.findDialog(new GenericTypeMatcher<>(JDialog.class) {
+                @Override
+                protected boolean isMatching(JDialog dialog) {
+                    return "Import HAR File".equals(dialog.getTitle()) && dialog.isShowing();
+                }
+            }).using(robot);
+
+            if (dialogFixture != null) {
+                System.out.println("Dialog Fixture initialized successfully.");
+            } else {
+                System.err.println("Failed to initialize Dialog Fixture.");
             }
-        }).using(robot);
+
+            dialogFixture.requireVisible();  // This will ensure the dialog is actually visible before continuing
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Test
     @Order(999)
-    void testDialogLoadsAndButtonsExist() {
+    void testFileSelectionAndLoading() {
         dialogFixture.requireVisible();
+        dialogFixture.robot().waitForIdle();
+
+        String testFilePath =
+            getClass().getClassLoader().getResource("www.qytera.de.har").getPath();
 
         JButtonFixture importButton = dialogFixture.button(JButtonMatcher.withText("Import"));
         importButton.requireDisabled();
 
         JButtonFixture cancelButton = dialogFixture.button(JButtonMatcher.withText("Cancel"));
         cancelButton.requireEnabled();
+
+        JButtonFixture browseButton = dialogFixture.button(JButtonMatcher.withText("Browse..."));
+        browseButton.click();
+
+        JFileChooserFixture fileChooserFixture = new JFileChooserFixture(robot);
+        fileChooserFixture.selectFile(new File(testFilePath));
+        robot.pressAndReleaseKeys(java.awt.event.KeyEvent.VK_ENTER);
+
+        importButton.requireEnabled();
     }
+
 
     @AfterEach
     void tearDown() {
