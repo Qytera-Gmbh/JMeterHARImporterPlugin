@@ -1,6 +1,7 @@
 package de.qytera.jmeterharimporter;
 
 import java.io.File;
+import java.util.logging.Logger;
 import javax.swing.JDialog;
 import javax.swing.SwingUtilities;
 import org.assertj.swing.core.BasicRobot;
@@ -24,9 +25,11 @@ import org.junit.jupiter.api.TestMethodOrder;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class ImportDialogBuilderTest {
 
+    private static final Logger LOGGER = Logger.getLogger(ImportDialogBuilderTest.class.getName());
+
     private static Robot robot;
     private DialogFixture dialogFixture;
-    private ImportDialogBuilder importDialogBuilder;  // Add this line to hold the instance
+    private ImportDialogBuilder importDialogBuilder;
 
     @BeforeAll
     static void setUpOnce() {
@@ -43,7 +46,7 @@ public class ImportDialogBuilderTest {
     void setUp() {
         try {
             SwingUtilities.invokeAndWait(() -> {
-                importDialogBuilder = new ImportDialogBuilder();  // Store the builder instance here
+                importDialogBuilder = new ImportDialogBuilder();
                 importDialogBuilder.showDialog();
             });
 
@@ -60,9 +63,9 @@ public class ImportDialogBuilderTest {
                 System.err.println("Failed to initialize Dialog Fixture.");
             }
 
-            dialogFixture.requireVisible();  // This will ensure the dialog is actually visible before continuing
+            dialogFixture.requireVisible();
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.severe("Exception occured during test setup.");
         }
     }
 

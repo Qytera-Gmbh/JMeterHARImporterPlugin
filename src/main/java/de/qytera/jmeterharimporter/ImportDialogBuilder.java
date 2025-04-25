@@ -13,6 +13,7 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.logging.Logger;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -29,6 +30,7 @@ import javax.swing.WindowConstants;
  * Builds and displays the dialog for importing a HAR file into JMeter.
  */
 public class ImportDialogBuilder {
+    private static final Logger LOGGER = Logger.getLogger(ImportDialogBuilder.class.getName());
 
     private static final int DIALOG_WIDTH = 500;
     private static final int DIALOG_HEIGHT = 400;
@@ -130,7 +132,7 @@ public class ImportDialogBuilder {
             dialog.revalidate();
             dialog.repaint();
         } catch (HarReaderException e) {
-            e.printStackTrace();
+            LOGGER.severe("Exception occured when loading har file.");
             importButton.setEnabled(false);
             JOptionPane.showMessageDialog(dialog, "Failed to load HAR file.", "Error",
                 JOptionPane.ERROR_MESSAGE);

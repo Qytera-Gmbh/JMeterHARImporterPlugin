@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 import org.apache.jmeter.control.LoopController;
 import org.apache.jmeter.control.TransactionController;
 import org.apache.jmeter.control.gui.LoopControlPanel;
@@ -36,6 +37,8 @@ import org.apache.jmeter.threads.ThreadGroup;
 import org.apache.jmeter.threads.gui.ThreadGroupGui;
 
 public class HARImporter {
+    private static final Logger LOGGER = Logger.getLogger(HARImporter.class.getName());
+
     private static final String THINK_TIME = "Think Time";
     private static final String HAR_IMPORTED = "HAR Imported";
     private final GuiPackage guiPackage;
@@ -140,7 +143,7 @@ public class HARImporter {
 
             return threadGroupNode;
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.severe("Exception occured during when adding a threadGroup");
             return null;
         }
     }
