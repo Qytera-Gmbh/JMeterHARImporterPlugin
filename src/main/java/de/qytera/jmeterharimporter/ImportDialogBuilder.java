@@ -144,7 +144,8 @@ public class ImportDialogBuilder {
                 } catch (HarReaderException e) {
                     LOGGER.severe("Exception occurred when loading HAR file.");
                     importButton.setEnabled(false);
-                    JOptionPane.showMessageDialog(dialog, "Failed to load HAR file.", "Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(dialog, "Failed to load HAR file.", "Error",
+                        JOptionPane.ERROR_MESSAGE);
                     return null;
                 }
             }
