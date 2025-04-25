@@ -162,7 +162,6 @@ public class HARImporterGetTest {
                 new HARImporter("src/test/resources/cookie-no-expiry-date.har");
             threadGroupNode = harImporter.addNewThreadGroupWithSamplers(false, false, true);
         } catch (Exception e) {
-            e.printStackTrace();
             exceptionThrown = true;
         }
 
