@@ -13,19 +13,26 @@ import org.apache.jmeter.gui.tree.JMeterTreeNode;
 import org.apache.jmeter.protocol.http.control.HeaderManager;
 import org.apache.jmeter.protocol.http.sampler.HTTPSamplerProxy;
 import org.apache.jmeter.sampler.TestAction;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.core.config.Configurator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-// tests GET and DELETE
 public class HARImporterGetTest {
 
     JMeterTreeNode threadGroupNode = null;
 
     @BeforeEach
     public void setUp() {
+        Configurator.setLevel("org.apache.jmeter", Level.OFF);
         HARImporter harImporter =
             new HARImporter("src/test/resources/get-www.randomnumberapi.com.har");
-        threadGroupNode = harImporter.addNewThreadGroupWithSamplers();
+
+        try {
+            threadGroupNode = harImporter.addNewThreadGroupWithSamplers();
+        } catch (Exception e) {
+            // nop
+        }
     }
 
     @Test

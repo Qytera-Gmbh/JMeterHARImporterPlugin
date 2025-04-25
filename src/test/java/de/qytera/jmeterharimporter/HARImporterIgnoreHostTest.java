@@ -4,6 +4,8 @@ import static org.junit.Assert.assertEquals;
 
 import javax.swing.tree.TreeNode;
 import org.apache.jmeter.protocol.http.sampler.HTTPSamplerProxy;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.core.config.Configurator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -14,6 +16,7 @@ public class HARImporterIgnoreHostTest {
 
     @BeforeEach
     public void setUp() {
+        Configurator.setLevel("org.apache.jmeter", Level.OFF);
         harImporter = new HARImporter("src/test/resources/filter/filter-host.har");
     }
 

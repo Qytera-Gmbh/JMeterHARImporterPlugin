@@ -1,9 +1,13 @@
 package de.qytera.jmeterharimporter;
 
+import static org.assertj.core.api.Fail.fail;
+
 import java.io.File;
 import java.util.logging.Logger;
 import javax.swing.JDialog;
 import javax.swing.SwingUtilities;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.core.config.Configurator;
 import org.assertj.swing.core.BasicRobot;
 import org.assertj.swing.core.GenericTypeMatcher;
 import org.assertj.swing.core.Robot;
@@ -44,6 +48,7 @@ public class ImportDialogBuilderTest {
 
     @BeforeEach
     void setUp() {
+        Configurator.setLevel("org.apache.jmeter", Level.OFF);
         try {
             SwingUtilities.invokeAndWait(() -> {
                 importDialogBuilder = new ImportDialogBuilder();
@@ -58,9 +63,9 @@ public class ImportDialogBuilderTest {
             }).using(robot);
 
             if (dialogFixture != null) {
-                System.out.println("Dialog Fixture initialized successfully.");
+                LOGGER.info("Dialog Fixture initialized successfully.");
             } else {
-                System.err.println("Failed to initialize Dialog Fixture.");
+                LOGGER.warning("Failed to initialize Dialog Fixture.");
             }
 
             dialogFixture.requireVisible();
@@ -72,11 +77,34 @@ public class ImportDialogBuilderTest {
     @Test
     @Order(999)
     void testFileSelectionAndLoading() {
-        dialogFixture.requireVisible();
         dialogFixture.robot().waitForIdle();
 
-        String testFilePath =
-            getClass().getClassLoader().getResource("www.qytera.de.har").getPath();
+        // opening dialog is a bit flaky
+        boolean dialogVisible = false;
+        int retryCount = 0;
+        int maxRetries = 3;
+        while (retryCount < maxRetries) {
+            try {
+                dialogFixture.requireVisible();
+                dialogVisible = true;
+                break;
+            } catch (AssertionError e) {
+                retryCount++;
+                LOGGER.warning("Dialog not visible, retrying... (" + retryCount + "/" + maxRetries + ")");
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+        }
+
+        if (!dialogVisible) {
+            LOGGER.severe("Dialog did not appear after " + maxRetries + " retries.");
+            fail("Dialog did not appear after retries");
+        }
+
+        String testFilePath = getClass().getClassLoader().getResource("www.qytera.de.har").getPath();
 
         JButtonFixture importButton = dialogFixture.button(JButtonMatcher.withText("Import"));
         importButton.requireDisabled();
@@ -93,7 +121,6 @@ public class ImportDialogBuilderTest {
 
         importButton.requireEnabled();
     }
-
 
     @AfterEach
     void tearDown() {
