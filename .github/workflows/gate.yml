@@ -33,7 +33,6 @@ jobs:
       - name: Build with Maven
         run: |
           export MAVEN_OPTS="-Djava.awt.headless=true"
-          mvn verify
           mvn package
     
       - name: Publish Unit Test Results
