@@ -90,7 +90,8 @@ public class ImportDialogBuilderTest {
                 break;
             } catch (AssertionError e) {
                 retryCount++;
-                LOGGER.warning("Dialog not visible, retrying... (" + retryCount + "/" + maxRetries + ")");
+                LOGGER.warning(
+                    "Dialog not visible, retrying... (" + retryCount + "/" + maxRetries + ")");
                 try {
                     Thread.sleep(500);
                 } catch (InterruptedException ie) {
@@ -104,7 +105,8 @@ public class ImportDialogBuilderTest {
             fail("Dialog did not appear after retries");
         }
 
-        String testFilePath = getClass().getClassLoader().getResource("www.qytera.de.har").getPath();
+        String testFilePath =
+            getClass().getClassLoader().getResource("www.qytera.de.har").getPath();
 
         JButtonFixture importButton = dialogFixture.button(JButtonMatcher.withText("Import"));
         importButton.requireDisabled();
@@ -118,6 +120,12 @@ public class ImportDialogBuilderTest {
         JFileChooserFixture fileChooserFixture = new JFileChooserFixture(robot);
         fileChooserFixture.selectFile(new File(testFilePath));
         robot.pressAndReleaseKeys(java.awt.event.KeyEvent.VK_ENTER);
+
+        try {
+            Thread.sleep(2000);
+        } catch (Exception e) {
+            // nop
+        }
 
         importButton.requireEnabled();
     }
