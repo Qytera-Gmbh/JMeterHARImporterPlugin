@@ -30,14 +30,21 @@ jobs:
           java-version: '17'
           distribution: 'adopt'
 
+      - name: Install Xvfb
+        run: sudo apt-get install -y xvfb
+      
+      - name: Start Xvfb
+        run: |
+          Xvfb :99 -screen 0 1920x1080x24 > /dev/null 2>&1 &
+          echo "DISPLAY=:99.0" >> $GITHUB_ENV
+          sleep 5 # Wait for Xvfb to start
+
       - name: Test with Maven
         run: |
-          export MAVEN_OPTS="-Djava.awt.headless=true"
           mvn verify
 
       - name: Build with Maven
         run: |
-          export MAVEN_OPTS="-Djava.awt.headless=true"
           mvn package -DskipTests=true
     
       - name: Publish Unit Test Results
@@ -46,4 +53,3 @@ jobs:
           files: target/surefire-reports/*.xml
           check_name: Test Results
         if: always()
-      
