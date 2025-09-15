@@ -37,7 +37,7 @@
         <dependency>
             <groupId>de.sstoehr</groupId>
             <artifactId>har-reader</artifactId>
-            <version>3.1.4</version>
+            <version>3.1.5</version>
         </dependency>
 
         <dependency>
@@ -96,7 +96,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>3.6.0</version>
+                <version>3.6.1</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
@@ -144,7 +144,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.5.3</version>
+                <version>3.5.4</version>
             </plugin>
 
             <plugin>
