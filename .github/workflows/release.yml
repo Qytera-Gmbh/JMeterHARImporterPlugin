@@ -1,9 +1,9 @@
 name: Release
 
 on:
-    push:
-      tags:
-        - 'v*' # Trigger the workflow on tag pushes that match the pattern 'v*'
+  push:
+    tags:
+      - 'v*' # Trigger the workflow on tag pushes that match the pattern 'v*'
 
 permissions:
   contents: write
@@ -27,7 +27,7 @@ jobs:
 
       - name: Install Xvfb
         run: sudo apt-get install -y xvfb
-      
+
       - name: Start Xvfb
         run: |
           Xvfb :99 -screen 0 1920x1080x24 > /dev/null 2>&1 &
@@ -46,11 +46,11 @@ jobs:
           tag_name: ${{ github.ref }}
           release_name: Release ${{ github.ref }}
           body_path: release-notes.txt
-      
+
       - name: Extract Tag Name
         id: extract_tag_name
         run: echo "TAG_NAME=$(echo "${{ github.ref }}" | cut -d '/' -f 3)" >> $GITHUB_ENV
-      
+
       - name: Upload JAR and Properties
         id: upload-release-assets
         uses: actions/upload-release-asset@v1

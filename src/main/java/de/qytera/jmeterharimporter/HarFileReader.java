@@ -3,6 +3,7 @@ package de.qytera.jmeterharimporter;
 import de.sstoehr.harreader.HarReader;
 import de.sstoehr.harreader.HarReaderException;
 import de.sstoehr.harreader.model.Har;
+
 import java.io.File;
 import java.util.logging.Level;
 import java.util.logging.Logger;

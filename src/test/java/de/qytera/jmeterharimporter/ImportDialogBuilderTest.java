@@ -1,11 +1,5 @@
 package de.qytera.jmeterharimporter;
 
-import static org.assertj.core.api.Fail.fail;
-
-import java.io.File;
-import java.util.logging.Logger;
-import javax.swing.JDialog;
-import javax.swing.SwingUtilities;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.assertj.swing.core.BasicRobot;
@@ -17,14 +11,13 @@ import org.assertj.swing.finder.WindowFinder;
 import org.assertj.swing.fixture.DialogFixture;
 import org.assertj.swing.fixture.JButtonFixture;
 import org.assertj.swing.fixture.JFileChooserFixture;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.*;
+
+import javax.swing.*;
+import java.io.File;
+import java.util.logging.Logger;
+
+import static org.assertj.core.api.Fail.fail;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class ImportDialogBuilderTest {
@@ -91,7 +84,7 @@ public class ImportDialogBuilderTest {
             } catch (AssertionError e) {
                 retryCount++;
                 LOGGER.warning(
-                    "Dialog not visible, retrying... (" + retryCount + "/" + maxRetries + ")");
+                        "Dialog not visible, retrying... (" + retryCount + "/" + maxRetries + ")");
                 try {
                     Thread.sleep(500);
                 } catch (InterruptedException ie) {
@@ -106,7 +99,7 @@ public class ImportDialogBuilderTest {
         }
 
         String testFilePath =
-            getClass().getClassLoader().getResource("www.qytera.de.har").getPath();
+                getClass().getClassLoader().getResource("www.qytera.de.har").getPath();
 
         JButtonFixture importButton = dialogFixture.button(JButtonMatcher.withText("Import"));
         importButton.requireDisabled();

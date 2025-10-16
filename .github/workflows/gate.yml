@@ -1,8 +1,8 @@
 name: Gate
 
 on:
-  pull_request: 
-    branches: 
+  pull_request:
+    branches:
       - main
   push:
     branches:
@@ -32,7 +32,7 @@ jobs:
 
       - name: Install Xvfb
         run: sudo apt-get install -y xvfb
-      
+
       - name: Start Xvfb
         run: |
           Xvfb :99 -screen 0 1920x1080x24 > /dev/null 2>&1 &
@@ -46,7 +46,7 @@ jobs:
       - name: Build with Maven
         run: |
           mvn package -DskipTests=true
-    
+
       - name: Publish Unit Test Results
         uses: EnricoMi/publish-unit-test-result-action@v2
         with:

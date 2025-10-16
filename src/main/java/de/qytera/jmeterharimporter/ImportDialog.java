@@ -1,9 +1,8 @@
 package de.qytera.jmeterharimporter;
 
-import javax.swing.JMenu;
-import javax.swing.JMenuItem;
-import javax.swing.MenuElement;
 import org.apache.jmeter.gui.plugin.MenuCreator;
+
+import javax.swing.*;
 
 /**
  * JMeter plugin menu item for importing a HAR file.
@@ -21,7 +20,7 @@ public final class ImportDialog implements MenuCreator {
         if (menuLocation == MENU_LOCATION.TOOLS) {
             JMenuItem importHarItem = new JMenuItem("Import HAR File...");
             importHarItem.addActionListener(e -> new ImportDialogBuilder().showDialog());
-            return new JMenuItem[] {importHarItem};
+            return new JMenuItem[]{importHarItem};
         }
         return new JMenuItem[0];
     }

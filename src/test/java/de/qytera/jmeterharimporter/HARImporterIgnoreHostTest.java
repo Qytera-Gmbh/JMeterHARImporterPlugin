@@ -1,13 +1,14 @@
 package de.qytera.jmeterharimporter;
 
-import static org.junit.Assert.assertEquals;
-
-import javax.swing.tree.TreeNode;
 import org.apache.jmeter.protocol.http.sampler.HTTPSamplerProxy;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import javax.swing.tree.TreeNode;
+
+import static org.junit.Assert.assertEquals;
 
 // tests ignored hosts
 public class HARImporterIgnoreHostTest {
@@ -25,13 +26,13 @@ public class HARImporterIgnoreHostTest {
         TreeNode threadGroup = harImporter.addNewThreadGroupWithSamplers();
         assertEquals(4, threadGroup.getChildCount());
         assertEquals("jsonplaceholder.typicode.com",
-            NodeUtil.getChild(threadGroup.getChildAt(0), HTTPSamplerProxy.class).getDomain());
+                NodeUtil.getChild(threadGroup.getChildAt(0), HTTPSamplerProxy.class).getDomain());
         assertEquals("jsonplaceholder.typicode.com",
-            NodeUtil.getChild(threadGroup.getChildAt(1), HTTPSamplerProxy.class).getDomain());
+                NodeUtil.getChild(threadGroup.getChildAt(1), HTTPSamplerProxy.class).getDomain());
         assertEquals("example.org",
-            NodeUtil.getChild(threadGroup.getChildAt(2), HTTPSamplerProxy.class).getDomain());
+                NodeUtil.getChild(threadGroup.getChildAt(2), HTTPSamplerProxy.class).getDomain());
         assertEquals("example.org",
-            NodeUtil.getChild(threadGroup.getChildAt(3), HTTPSamplerProxy.class).getDomain());
+                NodeUtil.getChild(threadGroup.getChildAt(3), HTTPSamplerProxy.class).getDomain());
     }
 
     @Test
@@ -40,9 +41,9 @@ public class HARImporterIgnoreHostTest {
         TreeNode threadGroup = harImporter.addNewThreadGroupWithSamplers();
         assertEquals(2, threadGroup.getChildCount());
         assertEquals("jsonplaceholder.typicode.com",
-            NodeUtil.getChild(threadGroup.getChildAt(0), HTTPSamplerProxy.class).getDomain());
+                NodeUtil.getChild(threadGroup.getChildAt(0), HTTPSamplerProxy.class).getDomain());
         assertEquals("jsonplaceholder.typicode.com",
-            NodeUtil.getChild(threadGroup.getChildAt(1), HTTPSamplerProxy.class).getDomain());
+                NodeUtil.getChild(threadGroup.getChildAt(1), HTTPSamplerProxy.class).getDomain());
     }
 
     @Test

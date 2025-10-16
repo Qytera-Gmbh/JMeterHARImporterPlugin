@@ -1,14 +1,14 @@
 package de.qytera.jmeterharimporter;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 import org.apache.jmeter.gui.tree.JMeterTreeNode;
 import org.apache.jmeter.protocol.http.sampler.HTTPSamplerProxy;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 // tests POST, PUT, and PATCH
 public class HARImporterPostTest {
@@ -31,7 +31,7 @@ public class HARImporterPostTest {
     public void testHARImporter_controller() {
         assertEquals(1, threadGroupNode.getChildCount());
         assertEquals("TC.001 - example.com",
-            ((JMeterTreeNode) threadGroupNode.getChildAt(0)).getName());
+                ((JMeterTreeNode) threadGroupNode.getChildAt(0)).getName());
     }
 
     @Test
@@ -41,6 +41,6 @@ public class HARImporterPostTest {
         HTTPSamplerProxy requestObject = (HTTPSamplerProxy) request.getUserObject();
         assertTrue(requestObject.getPostBodyRaw());
         assertEquals("{\"key1\": \"value1\", \"key2\": \"value2\"}",
-            requestObject.getArguments().getArgument(0).getValue());
+                requestObject.getArguments().getArgument(0).getValue());
     }
 }
