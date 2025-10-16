@@ -4,32 +4,15 @@ import de.sstoehr.harreader.HarReaderException;
 import de.sstoehr.harreader.model.Har;
 import de.sstoehr.harreader.model.HarEntry;
 import de.sstoehr.harreader.model.HarRequest;
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
+
+import javax.swing.*;
+import java.awt.*;
 import java.io.File;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.logging.Logger;
-import javax.swing.BorderFactory;
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JDialog;
-import javax.swing.JFileChooser;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JProgressBar;
-import javax.swing.JScrollPane;
-import javax.swing.JTextField;
-import javax.swing.SwingConstants;
-import javax.swing.SwingWorker;
-import javax.swing.WindowConstants;
 
 /**
  * Builds and displays the dialog for importing a HAR file into JMeter.
@@ -130,22 +113,22 @@ public class ImportDialogBuilder {
                     har = new de.sstoehr.harreader.HarReader().readFromFile(file);
 
                     har.log().entries().stream()
-                        .map(HarEntry::request)
-                        .map(HarRequest::url)
-                        .filter(url -> !url.startsWith("data:"))
-                        .map(URI::create)
-                        .map(URI::getHost)
-                        .filter(Objects::nonNull)
-                        .distinct()
-                        .sorted()
-                        .forEach(ImportDialogBuilder.this::addHostCheckbox);
+                            .map(HarEntry::request)
+                            .map(HarRequest::url)
+                            .filter(url -> !url.startsWith("data:"))
+                            .map(URI::create)
+                            .map(URI::getHost)
+                            .filter(Objects::nonNull)
+                            .distinct()
+                            .sorted()
+                            .forEach(ImportDialogBuilder.this::addHostCheckbox);
 
                     return null;
                 } catch (HarReaderException e) {
                     LOGGER.severe("Exception occurred when loading HAR file.");
                     importButton.setEnabled(false);
                     JOptionPane.showMessageDialog(dialog, "Failed to load HAR file.", "Error",
-                        JOptionPane.ERROR_MESSAGE);
+                            JOptionPane.ERROR_MESSAGE);
                     return null;
                 }
             }
@@ -277,9 +260,9 @@ public class ImportDialogBuilder {
                     });
 
                     importer.addNewThreadGroupWithSamplers(
-                        addTimerCheckbox.isSelected(),
-                        addHeaderCheckbox.isSelected(),
-                        addCookiesCheckbox.isSelected()
+                            addTimerCheckbox.isSelected(),
+                            addHeaderCheckbox.isSelected(),
+                            addCookiesCheckbox.isSelected()
                     );
 
                 } catch (Exception e) {

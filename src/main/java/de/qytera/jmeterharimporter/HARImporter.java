@@ -1,20 +1,6 @@
 package de.qytera.jmeterharimporter;
 
-import de.sstoehr.harreader.model.Har;
-import de.sstoehr.harreader.model.HarCookie;
-import de.sstoehr.harreader.model.HarEntry;
-import de.sstoehr.harreader.model.HarHeader;
-import de.sstoehr.harreader.model.HarQueryParam;
-import de.sstoehr.harreader.model.HarRequest;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URL;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Logger;
+import de.sstoehr.harreader.model.*;
 import org.apache.jmeter.control.LoopController;
 import org.apache.jmeter.control.TransactionController;
 import org.apache.jmeter.control.gui.LoopControlPanel;
@@ -35,6 +21,12 @@ import org.apache.jmeter.testelement.AbstractTestElement;
 import org.apache.jmeter.testelement.TestElement;
 import org.apache.jmeter.threads.ThreadGroup;
 import org.apache.jmeter.threads.gui.ThreadGroupGui;
+
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URL;
+import java.util.*;
+import java.util.logging.Logger;
 
 public class HARImporter {
     private static final Logger LOGGER = Logger.getLogger(HARImporter.class.getName());
@@ -123,7 +115,7 @@ public class HARImporter {
                 JMeterTreeNode transactionNode = transactionNodes.get(entryTime);
                 if (transactionNode == null) {
                     TransactionController tc = createTransactionController(
-                        String.format("TC.%03d - %s", index++, uri.getHost()));
+                            String.format("TC.%03d - %s", index++, uri.getHost()));
                     transactionNode = addComponent(tc, threadGroupNode);
                     transactionNodes.put(entryTime, transactionNode);
                 }
@@ -151,7 +143,7 @@ public class HARImporter {
 
     private void addSamplerWithExtras(HarRequest request, JMeterTreeNode parent, boolean addHeaders,
                                       boolean addCookies)
-        throws MalformedURLException, IllegalUserActionException {
+            throws MalformedURLException, IllegalUserActionException {
 
         JMeterTreeNode samplerNode = addComponent(createHttpSampler(request), parent);
 
@@ -178,7 +170,7 @@ public class HARImporter {
 
 
     private JMeterTreeNode addComponent(AbstractTestElement component, JMeterTreeNode node)
-        throws IllegalUserActionException {
+            throws IllegalUserActionException {
         if (component == null || node == null) {
             return null;
         }
@@ -206,22 +198,22 @@ public class HARImporter {
 
     private Cookie convertHarCookie(HarCookie harCookie) {
         long expiration = harCookie.expires() != null
-            ? harCookie.expires().toInstant().toEpochMilli() - new Date().getTime()
-            : Long.MAX_VALUE;
+                ? harCookie.expires().toInstant().toEpochMilli() - new Date().getTime()
+                : Long.MAX_VALUE;
 
         boolean isSecure = Boolean.TRUE.equals(harCookie.secure());
         String path = defaultString(harCookie.path());
         String domain = defaultString(harCookie.domain());
 
         return new Cookie(
-            harCookie.name(),
-            harCookie.value(),
-            domain,
-            path,
-            isSecure,
-            expiration,
-            !path.isEmpty(),
-            !domain.isEmpty()
+                harCookie.name(),
+                harCookie.value(),
+                domain,
+                path,
+                isSecure,
+                expiration,
+                !path.isEmpty(),
+                !domain.isEmpty()
         );
     }
 
@@ -238,7 +230,7 @@ public class HARImporter {
             headerManager.setProperty(TestElement.GUI_CLASS, HeaderPanel.class.getName());
             for (HarHeader header : harRequest.headers()) {
                 headerManager.add(new Header(header.name(),
-                    header.value()));
+                        header.value()));
             }
         }
 
@@ -306,9 +298,9 @@ public class HARImporter {
         TransactionController transactionControllerSub = new TransactionController();
         transactionControllerSub.setName(name);
         transactionControllerSub.setProperty(TestElement.TEST_CLASS,
-            TransactionController.class.getName());
+                TransactionController.class.getName());
         transactionControllerSub.setProperty(TestElement.GUI_CLASS,
-            LoopControlPanel.class.getName());
+                LoopControlPanel.class.getName());
 
         return transactionControllerSub;
     }

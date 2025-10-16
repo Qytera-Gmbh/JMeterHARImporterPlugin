@@ -1,8 +1,9 @@
 package de.qytera.jmeterharimporter;
 
-import java.util.logging.Logger;
 import org.apache.jmeter.gui.GuiPackage;
 import org.apache.jmeter.gui.tree.JMeterTreeModel;
+
+import java.util.logging.Logger;
 
 /**
  * Utility class to ensure that the GuiPackage singleton is properly initialized.
