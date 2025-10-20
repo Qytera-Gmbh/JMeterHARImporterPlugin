@@ -49,7 +49,10 @@ jobs:
 
       - name: Extract Tag Name
         id: extract_tag_name
-        run: echo "TAG_NAME=$(echo "${{ github.ref }}" | cut -d '/' -f 3)" >> $GITHUB_ENV
+        run: |
+          RAW_TAG=$(echo "${{ github.ref }}" | cut -d '/' -f 3)
+          TAG_NAME=${RAW_TAG#v}
+          echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
 
       - name: Upload JAR and Properties
         id: upload-release-assets
