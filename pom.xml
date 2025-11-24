@@ -20,7 +20,7 @@
             <dependency>
                 <groupId>tools.jackson</groupId>
                 <artifactId>jackson-bom</artifactId>
-                <version>3.0.1</version>
+                <version>3.0.2</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
@@ -70,7 +70,7 @@
         <dependency>
             <groupId>de.sstoehr</groupId>
             <artifactId>har-reader</artifactId>
-            <version>4.0.0</version>
+            <version>4.0.1</version>
         </dependency>
 
         <dependency>
