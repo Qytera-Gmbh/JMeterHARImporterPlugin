@@ -37,7 +37,7 @@
         <dependency>
             <groupId>de.sstoehr</groupId>
             <artifactId>har-reader</artifactId>
-            <version>3.1.6</version>
+            <version>4.0.1</version>
         </dependency>
 
         <dependency>
